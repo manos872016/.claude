@@ -1,0 +1,725 @@
+<title>Taka Ledger</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=IBM+Plex+Sans:wght@400;500;600&family=IBM+Plex+Serif:wght@500;600&family=IBM+Plex+Mono:wght@400;500&display=swap">
+<style>
+:root{
+  color-scheme:light;
+  --ground:#f3f6f4; --surface:#ffffff; --surface-2:#eaf0ec; --line:#d3dcd6; --line-strong:#a9b8ae;
+  --ink:#16201b; --ink-2:#4a5a52; --ink-3:#7a8a81;
+  --accent:#0f6a4f; --accent-ink:#ffffff; --accent-soft:#dcefe6; --accent-line:#8fc7b0;
+  --good:#1f7a45; --good-soft:#dcf1e3; --warn:#9a6300; --warn-soft:#fbeccb; --crit:#b23a2e; --crit-soft:#f9dcd8;
+  --bar:#1a7f5f; --bar-hi:#0f6a4f; --grid:#e1e8e4;
+  --focus:#2b8ad9;
+}
+@media (prefers-color-scheme: dark){
+  :root:not([data-theme="light"]){
+    color-scheme:dark;
+    --ground:#111614; --surface:#1a211d; --surface-2:#222b26; --line:#2f3b35; --line-strong:#4b5a52;
+    --ink:#e8eee9; --ink-2:#aebbb3; --ink-3:#7f8d85;
+    --accent:#3fb28c; --accent-ink:#0b1510; --accent-soft:#1c3a2f; --accent-line:#2f6f58;
+    --good:#4cc47f; --good-soft:#193526; --warn:#e2a93d; --warn-soft:#3a2d12; --crit:#ef7a6c; --crit-soft:#3d1f1b;
+    --bar:#3fb28c; --bar-hi:#6fd1ab; --grid:#27322c;
+  }
+}
+:root[data-theme="dark"]{
+  color-scheme:dark;
+  --ground:#111614; --surface:#1a211d; --surface-2:#222b26; --line:#2f3b35; --line-strong:#4b5a52;
+  --ink:#e8eee9; --ink-2:#aebbb3; --ink-3:#7f8d85;
+  --accent:#3fb28c; --accent-ink:#0b1510; --accent-soft:#1c3a2f; --accent-line:#2f6f58;
+  --good:#4cc47f; --good-soft:#193526; --warn:#e2a93d; --warn-soft:#3a2d12; --crit:#ef7a6c; --crit-soft:#3d1f1b;
+  --bar:#3fb28c; --bar-hi:#6fd1ab; --grid:#27322c;
+}
+*{box-sizing:border-box}
+body{margin:0;background:var(--ground);color:var(--ink);font:13px/1.45 "IBM Plex Sans",system-ui,-apple-system,"Segoe UI",sans-serif;padding-inline:16px;padding-block:0 32px}
+h1,h2,h3{font-family:"IBM Plex Serif",Georgia,serif;text-wrap:balance;margin:0}
+h1{font-size:20px;font-weight:600;letter-spacing:-.01em}
+h2{font-size:16px;font-weight:600}
+h3{font-size:13px;font-weight:600;font-family:"IBM Plex Sans",system-ui,sans-serif}
+.mono,.num,td.num,th.num,input[type=number],.big{font-family:"IBM Plex Mono",ui-monospace,Menlo,Consolas,monospace;font-variant-numeric:tabular-nums}
+.eyebrow{font-size:11px;letter-spacing:.06em;text-transform:uppercase;color:var(--ink-3);font-weight:500}
+a{color:var(--accent)}
+button,input,select,textarea{font:inherit;color:inherit}
+:focus-visible{outline:2px solid var(--focus);outline-offset:1px}
+
+.top{display:flex;align-items:center;justify-content:space-between;gap:12px;flex-wrap:wrap;padding-block:14px 10px;border-bottom:1px solid var(--line)}
+.brand{display:flex;align-items:baseline;gap:12px;flex-wrap:wrap}
+.brand .sub{color:var(--ink-2);font-size:12px}
+.topctl{display:flex;align-items:center;gap:8px;flex-wrap:wrap}
+.status-dot{display:inline-flex;align-items:center;gap:6px;font-size:12px;color:var(--ink-2)}
+.status-dot i{width:8px;height:8px;border-radius:50%;background:var(--ink-3);display:inline-block}
+.status-dot.on i{background:var(--good)}
+.status-dot.off i{background:var(--warn)}
+
+.tabs{display:flex;gap:2px;flex-wrap:wrap;margin-block:10px 14px;border-bottom:1px solid var(--line)}
+.tabs button{background:none;border:0;border-bottom:2px solid transparent;padding:8px 12px;color:var(--ink-2);cursor:pointer;font-weight:500;margin-bottom:-1px}
+.tabs button[aria-selected="true"]{color:var(--accent);border-bottom-color:var(--accent)}
+.tabs button:hover{color:var(--ink)}
+.panel[hidden]{display:none}
+
+.grid{display:grid;gap:14px}
+.g2{grid-template-columns:minmax(0,5fr) minmax(0,7fr)}
+.g3{grid-template-columns:repeat(3,minmax(0,1fr))}
+@media (max-width:820px){.g2,.g3{grid-template-columns:1fr}}
+.card{background:var(--surface);border:1px solid var(--line);border-radius:4px;padding:14px}
+.card h2{margin-bottom:10px}
+.card .hd{display:flex;justify-content:space-between;align-items:baseline;gap:8px;flex-wrap:wrap;margin-bottom:10px}
+.hint{color:var(--ink-3);font-size:12px}
+
+.form{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:8px 12px}
+.form .full{grid-column:1/-1}
+label.f{display:flex;flex-direction:column;gap:3px;font-size:12px;color:var(--ink-2)}
+label.f span.l{font-weight:500}
+input[type=text],input[type=number],input[type=date],input[type=tel],select,textarea{width:100%;background:var(--surface);border:1px solid var(--line-strong);border-radius:3px;padding:5px 7px;color:var(--ink);min-width:0}
+input[type=number]{text-align:right}
+textarea{resize:vertical;min-height:52px}
+.row{display:flex;gap:8px;align-items:center;flex-wrap:wrap}
+.btn{background:var(--surface-2);border:1px solid var(--line-strong);border-radius:3px;padding:5px 10px;cursor:pointer;font-weight:500}
+.btn:hover{border-color:var(--accent)}
+.btn.primary{background:var(--accent);color:var(--accent-ink);border-color:var(--accent)}
+.btn.danger{color:var(--crit)}
+.btn.sm{padding:2px 7px;font-size:12px}
+.btn[disabled]{opacity:.5;cursor:not-allowed}
+
+table{border-collapse:collapse;width:100%;font-size:12.5px}
+th,td{padding:5px 8px;border-bottom:1px solid var(--line);text-align:left;vertical-align:top}
+th{color:var(--ink-3);font-weight:500;font-size:11px;letter-spacing:.04em;text-transform:uppercase;white-space:nowrap}
+td.num,th.num{text-align:right;white-space:nowrap}
+tr.total td{font-weight:600;border-top:1px solid var(--line-strong);border-bottom:0}
+tr.sub td{color:var(--ink-2)}
+.tbl{overflow-x:auto}
+tbody tr:hover td{background:var(--surface-2)}
+
+.kpis{display:grid;grid-template-columns:repeat(auto-fit,minmax(150px,1fr));gap:8px;margin-bottom:12px}
+.kpi{background:var(--surface-2);border-radius:4px;padding:8px 10px}
+.kpi .k{font-size:11px;color:var(--ink-3);text-transform:uppercase;letter-spacing:.05em}
+.kpi .v{font-size:18px;font-weight:500;margin-top:2px}
+.kpi.hi{background:var(--accent-soft);border-left:3px solid var(--accent)}
+.big{font-size:22px}
+
+.pill{display:inline-block;padding:1px 7px;border-radius:10px;font-size:11px;font-weight:500;white-space:nowrap}
+.pill.good{background:var(--good-soft);color:var(--good)}
+.pill.warn{background:var(--warn-soft);color:var(--warn)}
+.pill.crit{background:var(--crit-soft);color:var(--crit)}
+.pill.mute{background:var(--surface-2);color:var(--ink-2)}
+.pill.acc{background:var(--accent-soft);color:var(--accent)}
+
+.rates{display:grid;grid-template-columns:auto 1fr 1fr;gap:4px 8px;align-items:center;font-size:12px}
+.rates input{padding:2px 5px}
+details{border-top:1px solid var(--line);padding-top:8px;margin-top:10px}
+summary{cursor:pointer;color:var(--ink-2);font-weight:500;font-size:12px}
+.notice{background:var(--warn-soft);color:var(--warn);border-radius:3px;padding:6px 10px;font-size:12px;margin-bottom:10px}
+.notice.ok{background:var(--accent-soft);color:var(--accent)}
+.toast{position:fixed;bottom:16px;left:50%;transform:translateX(-50%);background:var(--ink);color:var(--ground);padding:7px 14px;border-radius:4px;font-size:12px;opacity:0;transition:opacity .2s;pointer-events:none}
+.toast.show{opacity:1}
+.chart{width:100%;max-width:100%;height:auto;display:block}
+.chart text{fill:var(--ink-2);font-family:"IBM Plex Mono",monospace;font-size:11px}
+.chart .grid line{stroke:var(--grid)}
+.chart .axis{stroke:var(--line-strong)}
+.chart rect.bar{fill:var(--bar)}
+.chart rect.bar.neg{fill:var(--crit)}
+.chart rect.bar:hover{fill:var(--bar-hi)}
+.tip{position:absolute;background:var(--ink);color:var(--ground);padding:4px 8px;border-radius:3px;font-size:11px;pointer-events:none;opacity:0;white-space:nowrap}
+.chartwrap{position:relative}
+.cal li{display:grid;grid-template-columns:auto 1fr auto;gap:10px;padding:7px 0;border-bottom:1px solid var(--line);align-items:baseline}
+.cal{list-style:none;margin:0;padding:0}
+.cal .d{white-space:nowrap;color:var(--ink-2)}
+.cal .t b{font-weight:500}
+.cal .t small{display:block;color:var(--ink-3)}
+.empty{color:var(--ink-3);padding:12px 0;text-align:center}
+@media (prefers-reduced-motion:reduce){.toast{transition:none}}
+@media (max-width:560px){.form{grid-template-columns:1fr}.kpi .v{font-size:16px}}
+</style>
+
+<header class="top">
+  <div class="brand">
+    <h1>Taka Ledger</h1>
+    <span class="sub">Income tax · VAT · Customs · Financial statements · Bangladesh (NBR)</span>
+  </div>
+  <div class="topctl">
+    <label class="f" style="flex-direction:row;align-items:center;gap:6px"><span class="l">Assessment year</span>
+      <select id="ay"></select></label>
+    <span class="status-dot" id="dbstate"><i></i><span>Connecting…</span></span>
+  </div>
+</header>
+
+<nav class="tabs" role="tablist" id="tabs">
+  <button role="tab" data-tab="clients" aria-selected="true">Clients</button>
+  <button role="tab" data-tab="income">Income tax</button>
+  <button role="tab" data-tab="vat">VAT</button>
+  <button role="tab" data-tab="customs">Customs</button>
+  <button role="tab" data-tab="fs">Financial statements</button>
+  <button role="tab" data-tab="cal">Calendar</button>
+</nav>
+
+<!-- ============ CLIENTS ============ -->
+<section class="panel" id="p-clients">
+  <div class="notice" id="dbnotice" hidden>Saving is unavailable in this view. Entries shown are examples and edits will not be kept.</div>
+  <div class="kpis" id="clientkpis"></div>
+  <div class="grid g2">
+    <div class="card">
+      <div class="hd"><h2 id="cf-title">New client</h2><button class="btn sm" id="cf-reset" type="button">Clear</button></div>
+      <form id="cform" class="form" autocomplete="off">
+        <label class="f full"><span class="l">Name</span><input type="text" id="c-name" required></label>
+        <label class="f"><span class="l">TIN (12 digits)</span><input type="text" id="c-tin" inputmode="numeric" placeholder="e.g. 123456789012"></label>
+        <label class="f"><span class="l">BIN (VAT)</span><input type="text" id="c-bin" inputmode="numeric" placeholder="9 digits"></label>
+        <label class="f"><span class="l">Type</span>
+          <select id="c-kind"><option value="individual">Individual</option><option value="company">Company</option><option value="firm">Partnership firm</option></select></label>
+        <label class="f"><span class="l">Income year end</span>
+          <select id="c-ye"><option value="6">30 June</option><option value="12">31 December</option><option value="3">31 March</option><option value="9">30 September</option></select></label>
+        <label class="f"><span class="l">Return status</span>
+          <select id="c-status"><option value="pending">Pending</option><option value="in-progress">In progress</option><option value="filed">Filed</option><option value="overdue">Overdue</option></select></label>
+        <label class="f"><span class="l">Phone</span><input type="tel" id="c-phone"></label>
+        <label class="f full"><span class="l">Notes</span><textarea id="c-note" placeholder="Circle, zone, pending documents…"></textarea></label>
+        <div class="row full"><button class="btn primary" type="submit" id="cf-save">Save client</button><span class="hint" id="cf-msg"></span></div>
+      </form>
+    </div>
+    <div class="card">
+      <div class="hd"><h2>Client register</h2>
+        <div class="row"><input type="text" id="c-search" placeholder="Search name / TIN" style="width:170px">
+          <select id="c-filter"><option value="">All statuses</option><option value="pending">Pending</option><option value="in-progress">In progress</option><option value="filed">Filed</option><option value="overdue">Overdue</option></select>
+          <button class="btn sm" id="c-export" type="button" hidden>Export CSV</button></div></div>
+      <div class="tbl"><table id="ctable"><thead><tr><th>Client</th><th>Type</th><th>Year end</th><th>Next return due</th><th>Status</th><th></th></tr></thead><tbody></tbody></table></div>
+    </div>
+  </div>
+  <div class="card" style="margin-top:14px">
+    <div class="hd"><h2>Saved computations</h2><span class="hint">Every calculator can save its result against a client. Load one to restore the inputs.</span></div>
+    <div class="tbl"><table id="casetable"><thead><tr><th>Saved</th><th>Client</th><th>Type</th><th>Summary</th><th class="num">Result (Tk)</th><th></th></tr></thead><tbody></tbody></table></div>
+  </div>
+</section>
+
+<!-- ============ INCOME TAX ============ -->
+<section class="panel" id="p-income" hidden>
+  <div class="grid g2">
+    <div class="card">
+      <div class="hd"><h2>Individual assessee</h2><span class="hint" id="it-ayhint"></span></div>
+      <div class="form">
+        <label class="f full"><span class="l">Total taxable income (Tk)</span><input type="number" id="it-income" value="1450000" min="0" step="1000"></label>
+        <label class="f"><span class="l">Category</span>
+          <select id="it-cat"><option value="general">General</option><option value="women">Women / aged 65+</option><option value="disabled">Person with disability / third gender</option><option value="ff">Gazetted freedom fighter</option></select></label>
+        <label class="f"><span class="l">Location (minimum tax)</span>
+          <select id="it-loc"><option value="dhakaCtg">Dhaka / Chattogram city corp.</option><option value="otherCity">Other city corporation</option><option value="other">Outside city corporations</option></select></label>
+        <label class="f"><span class="l">Eligible investment (Tk)</span><input type="number" id="it-inv" value="300000" min="0" step="1000"></label>
+        <label class="f"><span class="l">Tax deducted at source (Tk)</span><input type="number" id="it-tds" value="60000" min="0" step="1000"></label>
+        <label class="f"><span class="l">Advance tax paid (Tk)</span><input type="number" id="it-adv" value="0" min="0" step="1000"></label>
+        <label class="f"><span class="l">Return filed by Tax Day?</span>
+          <select id="it-late"><option value="0">Yes, on time</option><option value="1">No, late</option></select></label>
+      </div>
+      <details><summary>Slabs and thresholds for this year (editable)</summary>
+        <div class="rates" id="it-rates" style="margin-top:8px"></div>
+        <p class="hint" style="margin:8px 0 0">Rebate = lowest of 3% of total income, 15% of eligible investment, or Tk 10,00,000. Late filing: the reduced-rate rebate is lost and 2% per month of delay accrues on the balance. Verify against the Finance Act in force before filing.</p>
+      </details>
+      <div class="row" style="margin-top:12px"><button class="btn primary" type="button" data-save="income">Save to client</button></div>
+    </div>
+    <div class="card">
+      <div class="kpis">
+        <div class="kpi hi"><div class="k">Net tax payable with return</div><div class="v" id="it-k-pay">–</div></div>
+        <div class="kpi"><div class="k">Tax after rebate</div><div class="v" id="it-k-net">–</div></div>
+        <div class="kpi"><div class="k">Effective rate</div><div class="v" id="it-k-eff">–</div></div>
+      </div>
+      <div class="tbl"><table id="it-table"><thead><tr><th>Slab</th><th class="num">Taxable (Tk)</th><th class="num">Rate</th><th class="num">Tax (Tk)</th></tr></thead><tbody></tbody></table></div>
+    </div>
+  </div>
+  <div class="grid g2" style="margin-top:14px">
+    <div class="card">
+      <h2>Company assessee</h2>
+      <div class="form">
+        <label class="f full"><span class="l">Taxable profit (Tk)</span><input type="number" id="co-profit" value="8500000" min="0" step="10000"></label>
+        <label class="f full"><span class="l">Entity type</span>
+          <select id="co-type">
+            <option value="27.5">Non-listed company — 27.5%</option>
+            <option value="22.5">Listed company (>10% via IPO) — 22.5%</option>
+            <option value="22.5">One person company — 22.5%</option>
+            <option value="37.5">Bank / insurance / NBFI, listed — 37.5%</option>
+            <option value="40">Bank / insurance / NBFI, non-listed — 40%</option>
+            <option value="45">Mobile operator / tobacco — 45%</option>
+            <option value="15">Textile / RMG (reduced) — 15%</option>
+            <option value="20">Co-operative society — 20%</option>
+          </select></label>
+        <label class="f"><span class="l">Rate applied (%)</span><input type="number" id="co-rate" value="27.5" step="0.5" min="0"></label>
+        <label class="f"><span class="l">Gross receipts (Tk)</span><input type="number" id="co-receipts" value="120000000" min="0" step="100000"></label>
+        <label class="f"><span class="l">Minimum tax on receipts (%)</span><input type="number" id="co-minrate" value="0.6" step="0.1" min="0"></label>
+        <label class="f"><span class="l">TDS / advance tax paid (Tk)</span><input type="number" id="co-paid" value="900000" min="0" step="10000"></label>
+      </div>
+      <p class="hint" style="margin:8px 0 0">Minimum tax under s.163 is compared with regular tax and the higher applies. Reduced 22.5% needs all receipts through banking channels beyond the cash limit.</p>
+      <div class="row" style="margin-top:12px"><button class="btn primary" type="button" data-save="company">Save to client</button></div>
+    </div>
+    <div class="card">
+      <div class="kpis">
+        <div class="kpi hi"><div class="k">Tax liability</div><div class="v" id="co-k-tax">–</div></div>
+        <div class="kpi"><div class="k">Balance payable</div><div class="v" id="co-k-pay">–</div></div>
+        <div class="kpi"><div class="k">Basis</div><div class="v" id="co-k-basis" style="font-size:13px;font-family:inherit">–</div></div>
+      </div>
+      <div class="tbl"><table id="co-table"><tbody></tbody></table></div>
+    </div>
+  </div>
+</section>
+
+<!-- ============ VAT ============ -->
+<section class="panel" id="p-vat" hidden>
+  <div class="grid g2">
+    <div class="card">
+      <div class="hd"><h2>Monthly VAT return (Mushak 9.1)</h2><span class="hint">Due 15th of the following month</span></div>
+      <div class="form">
+        <label class="f"><span class="l">Taxable supplies, excl. VAT (Tk)</span><input type="number" id="v-sales" value="4200000" min="0" step="1000"></label>
+        <label class="f"><span class="l">Output rate (%)</span>
+          <select id="v-rate"><option value="15">15 standard</option><option value="10">10 reduced</option><option value="7.5">7.5 reduced</option><option value="5">5 reduced</option><option value="4">4 turnover tax</option><option value="0">0 zero-rated / export</option></select></label>
+        <label class="f"><span class="l">Exempt / zero-rated supplies (Tk)</span><input type="number" id="v-exempt" value="300000" min="0" step="1000"></label>
+        <label class="f"><span class="l">Purchases with valid Mushak 6.3, excl. VAT (Tk)</span><input type="number" id="v-purch" value="2600000" min="0" step="1000"></label>
+        <label class="f"><span class="l">Input VAT rate (%)</span><input type="number" id="v-inrate" value="15" step="0.5" min="0"></label>
+        <label class="f"><span class="l">Advance tax paid at import (Tk)</span><input type="number" id="v-at" value="45000" min="0" step="1000"></label>
+        <label class="f"><span class="l">VAT deducted at source by buyers (Tk)</span><input type="number" id="v-vds" value="0" min="0" step="1000"></label>
+        <label class="f"><span class="l">Closing balance brought forward (Tk)</span><input type="number" id="v-bf" value="0" min="0" step="1000"></label>
+        <label class="f"><span class="l">Days late (if any)</span><input type="number" id="v-late" value="0" min="0" step="1"></label>
+      </div>
+      <p class="hint" style="margin:8px 0 0">Input credit is restricted to the taxable share when exempt supplies exist (partial credit). Late return: Tk 10,000 penalty plus 1% interest per month on unpaid VAT.</p>
+      <div class="row" style="margin-top:12px"><button class="btn primary" type="button" data-save="vat">Save to client</button></div>
+    </div>
+    <div class="card">
+      <div class="kpis">
+        <div class="kpi hi"><div class="k">Net VAT payable</div><div class="v" id="v-k-net">–</div></div>
+        <div class="kpi"><div class="k">Output VAT</div><div class="v" id="v-k-out">–</div></div>
+        <div class="kpi"><div class="k">Allowable input credit</div><div class="v" id="v-k-in">–</div></div>
+      </div>
+      <div class="tbl"><table id="v-table"><tbody></tbody></table></div>
+      <details><summary>Inclusive ↔ exclusive converter</summary>
+        <div class="form" style="margin-top:8px">
+          <label class="f"><span class="l">VAT-inclusive price (Tk)</span><input type="number" id="cv-incl" value="1150" step="1"></label>
+          <label class="f"><span class="l">Rate (%)</span><input type="number" id="cv-rate" value="15" step="0.5"></label>
+        </div>
+        <p class="mono" id="cv-out" style="margin:8px 0 0"></p>
+      </details>
+    </div>
+  </div>
+</section>
+
+<!-- ============ CUSTOMS ============ -->
+<section class="panel" id="p-customs" hidden>
+  <div class="grid g2">
+    <div class="card">
+      <div class="hd"><h2>Import duty assessment</h2><span class="hint">Bill of Entry basis</span></div>
+      <div class="form">
+        <label class="f full"><span class="l">Description / HS code</span><input type="text" id="cu-desc" value="8471.30 — Portable computers" placeholder="HS code and goods"></label>
+        <label class="f"><span class="l">FOB value (foreign currency)</span><input type="number" id="cu-fob" value="25000" min="0" step="100"></label>
+        <label class="f"><span class="l">Exchange rate (Tk per unit)</span><input type="number" id="cu-fx" value="122.50" min="0" step="0.01"></label>
+        <label class="f"><span class="l">Freight (foreign currency)</span><input type="number" id="cu-frt" value="900" min="0" step="10"></label>
+        <label class="f"><span class="l">Insurance (blank = 1% of FOB)</span><input type="number" id="cu-ins" placeholder="auto 1%" min="0" step="10"></label>
+        <label class="f"><span class="l">Landing charge (%)</span><input type="number" id="cu-land" value="1" step="0.5" min="0"></label>
+        <label class="f"><span class="l">Customs duty CD (%)</span><input type="number" id="cu-cd" value="10" step="0.5" min="0"></label>
+        <label class="f"><span class="l">Regulatory duty RD (%)</span><input type="number" id="cu-rd" value="0" step="0.5" min="0"></label>
+        <label class="f"><span class="l">Supplementary duty SD (%)</span><input type="number" id="cu-sd" value="0" step="0.5" min="0"></label>
+        <label class="f"><span class="l">VAT (%)</span><input type="number" id="cu-vat" value="15" step="0.5" min="0"></label>
+        <label class="f"><span class="l">Advance income tax AIT (%)</span><input type="number" id="cu-ait" value="5" step="0.5" min="0"></label>
+        <label class="f"><span class="l">Advance tax AT (%)</span><input type="number" id="cu-at" value="5" step="0.5" min="0"></label>
+      </div>
+      <p class="hint" style="margin:8px 0 0">Assessable value = CIF + landing charge. SD is charged on AV + CD + RD. VAT and AT on AV + CD + RD + SD. AIT on AV. AT and VAT are creditable in the VAT return for registered importers; AIT is adjustable against income tax.</p>
+      <div class="row" style="margin-top:12px"><button class="btn primary" type="button" data-save="customs">Save to client</button></div>
+    </div>
+    <div class="card">
+      <div class="kpis">
+        <div class="kpi hi"><div class="k">Total duty and taxes</div><div class="v" id="cu-k-total">–</div></div>
+        <div class="kpi"><div class="k">Assessable value</div><div class="v" id="cu-k-av">–</div></div>
+        <div class="kpi"><div class="k">Total incidence on AV</div><div class="v" id="cu-k-tti">–</div></div>
+        <div class="kpi"><div class="k">Non-creditable cost</div><div class="v" id="cu-k-cost">–</div></div>
+      </div>
+      <div class="tbl"><table id="cu-table"><thead><tr><th>Line</th><th class="num">Base (Tk)</th><th class="num">Rate</th><th class="num">Amount (Tk)</th><th>Treatment</th></tr></thead><tbody></tbody></table></div>
+    </div>
+  </div>
+</section>
+
+<!-- ============ FINANCIAL STATEMENTS ============ -->
+<section class="panel" id="p-fs" hidden>
+  <div class="grid g2">
+    <div class="card">
+      <div class="hd"><h2>Statement inputs</h2><span class="hint">Tk, for the income year</span></div>
+      <h3 style="margin:4px 0 6px">Profit or loss</h3>
+      <div class="form">
+        <label class="f"><span class="l">Revenue</span><input type="number" id="fs-rev" value="96500000" step="10000"></label>
+        <label class="f"><span class="l">Cost of sales</span><input type="number" id="fs-cogs" value="61200000" step="10000"></label>
+        <label class="f"><span class="l">Operating expenses</span><input type="number" id="fs-opex" value="18400000" step="10000"></label>
+        <label class="f"><span class="l">Depreciation (in opex)</span><input type="number" id="fs-dep" value="3100000" step="10000"></label>
+        <label class="f"><span class="l">Finance cost</span><input type="number" id="fs-fin" value="2900000" step="10000"></label>
+        <label class="f"><span class="l">Income tax expense</span><input type="number" id="fs-tax" value="3850000" step="10000"></label>
+      </div>
+      <h3 style="margin:12px 0 6px">Financial position</h3>
+      <div class="form">
+        <label class="f"><span class="l">Cash and bank</span><input type="number" id="fs-cash" value="6200000" step="10000"></label>
+        <label class="f"><span class="l">Trade receivables</span><input type="number" id="fs-ar" value="14800000" step="10000"></label>
+        <label class="f"><span class="l">Inventory</span><input type="number" id="fs-inv" value="17500000" step="10000"></label>
+        <label class="f"><span class="l">Total current assets</span><input type="number" id="fs-ca" value="41000000" step="10000"></label>
+        <label class="f"><span class="l">Total assets</span><input type="number" id="fs-ta" value="88000000" step="10000"></label>
+        <label class="f"><span class="l">Total current liabilities</span><input type="number" id="fs-cl" value="24500000" step="10000"></label>
+        <label class="f"><span class="l">Interest-bearing debt</span><input type="number" id="fs-debt" value="21000000" step="10000"></label>
+        <label class="f"><span class="l">Total equity</span><input type="number" id="fs-eq" value="39500000" step="10000"></label>
+        <label class="f"><span class="l">Trade payables</span><input type="number" id="fs-ap" value="9800000" step="10000"></label>
+      </div>
+      <div class="row" style="margin-top:12px"><button class="btn primary" type="button" data-save="fs">Save to client</button></div>
+    </div>
+    <div class="card">
+      <div class="hd"><h2>Profit bridge</h2><span class="hint" id="fs-chart-hint">Tk lakh</span></div>
+      <div class="chartwrap"><svg class="chart" id="fs-chart" viewBox="0 0 560 240" role="img" aria-label="Profit bridge from revenue to net profit"></svg><div class="tip" id="fs-tip"></div></div>
+      <div class="tbl" style="margin-top:12px"><table id="fs-table"><thead><tr><th>Ratio</th><th class="num">Value</th><th>Read</th><th>Guide</th></tr></thead><tbody></tbody></table></div>
+    </div>
+  </div>
+</section>
+
+<!-- ============ CALENDAR ============ -->
+<section class="panel" id="p-cal" hidden>
+  <div class="grid g2">
+    <div class="card">
+      <div class="hd"><h2>Statutory deadlines</h2><span class="hint" id="cal-today"></span></div>
+      <ul class="cal" id="cal-list"></ul>
+    </div>
+    <div class="card">
+      <div class="hd"><h2>Client return due dates</h2><span class="hint">Derived from each client's type and year end</span></div>
+      <ul class="cal" id="cal-clients"></ul>
+      <details><summary>How due dates are derived</summary>
+        <p class="hint" style="margin-top:6px">Individuals: Tax Day, 30 November following the income year. Companies: Tax Day is the 15th day of the seventh month after the income year end (30 June year end → 15 January), or 15 September if that falls earlier. VAT returns: 15th of the next month. Withholding returns: 31 January and 31 July. Advance tax: 15 September, 15 December, 15 March, 15 June.</p>
+      </details>
+    </div>
+  </div>
+</section>
+
+<div class="toast" id="toast" role="status"></div>
+
+<script>
+(function(){
+'use strict';
+const $ = s => document.querySelector(s);
+const $$ = s => Array.from(document.querySelectorAll(s));
+const num = id => { const v = parseFloat($('#'+id).value); return isFinite(v) ? v : 0; };
+const insv = (id,v) => { const el=$('#'+id); if(el) el.value = v; };
+
+// Bangladeshi grouping: 12,34,56,789
+function fmt(n, d){ d = d==null?0:d; if(!isFinite(n)) return '–'; const neg=n<0; n=Math.abs(n);
+  let s = n.toFixed(d); let [i,f] = s.split('.');
+  if(i.length>3){ const last=i.slice(-3); let rest=i.slice(0,-3); rest = rest.replace(/\B(?=(\d{2})+(?!\d))/g, ','); i = rest+','+last; }
+  return (neg?'−':'')+i+(f?'.'+f:''); }
+const tk = n => 'Tk '+fmt(n);
+const pct = (n,d) => isFinite(n)?fmt(n,d==null?1:d)+'%':'–';
+function toast(m){ const t=$('#toast'); t.textContent=m; t.classList.add('show'); clearTimeout(toast.h); toast.h=setTimeout(()=>t.classList.remove('show'),2200); }
+function esc(s){ return String(s==null?'':s).replace(/[&<>"]/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;'}[c])); }
+const fmtDate = d => d.toLocaleDateString('en-GB',{day:'2-digit',month:'short',year:'numeric'});
+
+// ---------- Tabs ----------
+$$('#tabs button').forEach(b=>b.addEventListener('click',()=>{
+  $$('#tabs button').forEach(x=>x.setAttribute('aria-selected',x===b));
+  $$('.panel').forEach(p=>p.hidden = p.id!=='p-'+b.dataset.tab);
+  try{localStorage.setItem('tl.tab',b.dataset.tab);}catch(e){}
+}));
+try{ const t=localStorage.getItem('tl.tab'); if(t){ const b=$('#tabs button[data-tab="'+t+'"]'); if(b) b.click(); } }catch(e){}
+
+// ---------- Assessment-year presets ----------
+const AY = {
+  '2026-27': { label:'AY 2026-27 (income year 2025-26)',
+    thr:{general:375000, women:425000, disabled:500000, ff:525000},
+    slabs:[[300000,10],[400000,15],[500000,20],[2000000,25],[Infinity,30]],
+    min:{dhakaCtg:5000, otherCity:5000, other:5000} },
+  '2025-26': { label:'AY 2025-26 (income year 2024-25)',
+    thr:{general:350000, women:400000, disabled:475000, ff:500000},
+    slabs:[[100000,5],[400000,10],[500000,15],[500000,20],[2000000,25],[Infinity,30]],
+    min:{dhakaCtg:5000, otherCity:4000, other:3000} }
+};
+let cur = JSON.parse(JSON.stringify(AY['2026-27'], (k,v)=>v===Infinity?'INF':v), (k,v)=>v==='INF'?Infinity:v);
+const aySel=$('#ay'); Object.keys(AY).forEach(k=>{const o=document.createElement('option');o.value=k;o.textContent=AY[k].label;aySel.appendChild(o);});
+aySel.addEventListener('change',()=>{ cur = JSON.parse(JSON.stringify(AY[aySel.value],(k,v)=>v===Infinity?'INF':v),(k,v)=>v==='INF'?Infinity:v); renderRates(); calcIncome(); });
+
+function renderRates(){
+  const r=$('#it-rates'); r.innerHTML='';
+  const add=(l,a,b)=>{ r.insertAdjacentHTML('beforeend',`<span>${l}</span>${a}${b}`); };
+  r.insertAdjacentHTML('beforeend','<span class="eyebrow">Threshold</span><span class="eyebrow">Tk</span><span></span>');
+  [['General','general'],['Women / 65+','women'],['Disability / third gender','disabled'],['Freedom fighter','ff']].forEach(([l,k])=>
+    add(l,`<input type="number" data-thr="${k}" value="${cur.thr[k]}" step="5000">`,'<span></span>'));
+  r.insertAdjacentHTML('beforeend','<span class="eyebrow">Slab</span><span class="eyebrow">Width Tk</span><span class="eyebrow">Rate %</span>');
+  cur.slabs.forEach((s,i)=> add(i===cur.slabs.length-1?'Remainder':'Next',
+    i===cur.slabs.length-1?'<span class="hint">balance</span>':`<input type="number" data-sw="${i}" value="${s[0]}" step="50000">`,
+    `<input type="number" data-sr="${i}" value="${s[1]}" step="0.5">`));
+  r.insertAdjacentHTML('beforeend','<span class="eyebrow">Minimum tax</span><span class="eyebrow">Tk</span><span></span>');
+  [['Dhaka / Ctg','dhakaCtg'],['Other city corp.','otherCity'],['Elsewhere','other']].forEach(([l,k])=>
+    add(l,`<input type="number" data-min="${k}" value="${cur.min[k]}" step="500">`,'<span></span>'));
+  r.querySelectorAll('input').forEach(i=>i.addEventListener('input',()=>{
+    if(i.dataset.thr) cur.thr[i.dataset.thr]=+i.value||0;
+    if(i.dataset.sw) cur.slabs[+i.dataset.sw][0]=+i.value||0;
+    if(i.dataset.sr!=null) cur.slabs[+i.dataset.sr][1]=+i.value||0;
+    if(i.dataset.min) cur.min[i.dataset.min]=+i.value||0;
+    calcIncome();
+  }));
+}
+
+// ---------- Income tax: individual ----------
+function calcIncome(){
+  const inc=num('it-income'), cat=$('#it-cat').value, loc=$('#it-loc').value, inv=num('it-inv'), tds=num('it-tds'), adv=num('it-adv'), late=$('#it-late').value==='1';
+  const thr=cur.thr[cat]; let rem=Math.max(0,inc); const rows=[]; let gross=0;
+  const t=Math.min(rem,thr); rows.push(['First '+fmt(thr)+' (tax-free)',t,0,0]); rem-=t;
+  cur.slabs.forEach((s,i)=>{ const w=s[0]===Infinity?rem:Math.min(rem,s[0]); if(w<=0&&rem<=0) return; const tax=w*s[1]/100; gross+=tax;
+    rows.push([(s[0]===Infinity?'Remainder':'Next '+fmt(s[0])),w,s[1],tax]); rem-=w; });
+  const rebate = inc>thr ? Math.min(inc*0.03, inv*0.15, 1000000, gross) : 0;
+  let net = gross-rebate; const minTax=cur.min[loc]||0; let basis='';
+  if(inc>thr && net<minTax){ net=minTax; basis='Minimum tax applied'; }
+  const payable = net - tds - adv;
+  $('#it-k-net').textContent = tk(net);
+  $('#it-k-pay').textContent = (payable<0?'Refundable ':'')+tk(Math.abs(payable));
+  $('#it-k-eff').textContent = inc>0?pct(net/inc*100,2):'–';
+  const tb=$('#it-table tbody'); tb.innerHTML='';
+  rows.forEach(r=>tb.insertAdjacentHTML('beforeend',`<tr><td>${r[0]}</td><td class="num">${fmt(r[1])}</td><td class="num">${r[2]}%</td><td class="num">${fmt(r[3])}</td></tr>`));
+  tb.insertAdjacentHTML('beforeend',`<tr class="total"><td colspan="3">Gross tax</td><td class="num">${fmt(gross)}</td></tr>
+    <tr class="sub"><td colspan="3">Less: investment rebate (lowest of 3% income · 15% investment · Tk 10 lakh)</td><td class="num">(${fmt(rebate)})</td></tr>
+    ${basis?`<tr class="sub"><td colspan="3">${basis} — ${loc==='dhakaCtg'?'Dhaka/Chattogram':loc==='otherCity'?'other city corporation':'outside city corporations'}</td><td class="num">${fmt(minTax)}</td></tr>`:''}
+    <tr class="total"><td colspan="3">Tax after rebate</td><td class="num">${fmt(net)}</td></tr>
+    <tr class="sub"><td colspan="3">Less: TDS</td><td class="num">(${fmt(tds)})</td></tr>
+    <tr class="sub"><td colspan="3">Less: advance tax</td><td class="num">(${fmt(adv)})</td></tr>
+    <tr class="total"><td colspan="3">${payable<0?'Refund due':'Payable with return'}${late?' <span class="pill warn">late — add 2%/month delay interest</span>':''}</td><td class="num">${fmt(Math.abs(payable))}</td></tr>`);
+  $('#it-ayhint').textContent = AY[aySel.value].label;
+  state.income={inputs:{income:inc,cat,loc,inv,tds,adv,late:late?1:0,ay:aySel.value},result:payable,summary:`Income ${fmt(inc)} · tax ${fmt(net)} · ${payable<0?'refund':'payable'} ${fmt(Math.abs(payable))}`};
+}
+
+// ---------- Income tax: company ----------
+$('#co-type').addEventListener('change',()=>{ insv('co-rate',$('#co-type').value); calcCompany(); });
+function calcCompany(){
+  const p=num('co-profit'), r=num('co-rate'), rec=num('co-receipts'), mr=num('co-minrate'), paid=num('co-paid');
+  const reg=p*r/100, min=rec*mr/100; const tax=Math.max(reg,min); const basis = min>reg?'Minimum tax on gross receipts':'Regular tax on profit';
+  const pay=tax-paid;
+  $('#co-k-tax').textContent=tk(tax); $('#co-k-pay').textContent=(pay<0?'Refundable ':'')+tk(Math.abs(pay)); $('#co-k-basis').textContent=basis;
+  $('#co-table tbody').innerHTML=`<tr><td>Regular tax: ${fmt(p)} × ${r}%</td><td class="num">${fmt(reg)}</td></tr>
+    <tr><td>Minimum tax: ${fmt(rec)} × ${mr}%</td><td class="num">${fmt(min)}</td></tr>
+    <tr class="total"><td>Higher of the two</td><td class="num">${fmt(tax)}</td></tr>
+    <tr class="sub"><td>Less: TDS and advance tax</td><td class="num">(${fmt(paid)})</td></tr>
+    <tr class="total"><td>${pay<0?'Refund / carry-forward':'Balance payable'}</td><td class="num">${fmt(Math.abs(pay))}</td></tr>`;
+  state.company={inputs:{profit:p,rate:r,receipts:rec,minrate:mr,paid},result:pay,summary:`Profit ${fmt(p)} @ ${r}% · ${basis.toLowerCase()} · ${pay<0?'refund':'payable'} ${fmt(Math.abs(pay))}`};
+}
+
+// ---------- VAT ----------
+function calcVat(){
+  const sales=num('v-sales'), rate=parseFloat($('#v-rate').value), ex=num('v-exempt'), pur=num('v-purch'), inr=num('v-inrate'), at=num('v-at'), vds=num('v-vds'), bf=num('v-bf'), late=num('v-late');
+  const out=sales*rate/100; const inputVat=pur*inr/100;
+  const share = (sales+ex)>0 ? sales/(sales+ex) : 1;
+  const turnover = rate===4;
+  const credit = turnover?0:inputVat*share;
+  const net = out - credit - at - vds - bf;
+  const penalty = late>0 ? 10000 : 0; const interest = late>0 && net>0 ? net*0.01*Math.ceil(late/30) : 0;
+  const total = net + penalty + interest;
+  $('#v-k-net').textContent = net<0?'Carry forward '+tk(-net):tk(total);
+  $('#v-k-out').textContent = tk(out); $('#v-k-in').textContent = tk(credit);
+  $('#v-table tbody').innerHTML=`<tr><td>Output VAT: ${fmt(sales)} × ${rate}%</td><td class="num">${fmt(out)}</td></tr>
+    <tr class="sub"><td>Input VAT on purchases: ${fmt(pur)} × ${inr}%</td><td class="num">${fmt(inputVat)}</td></tr>
+    <tr class="sub"><td>Allowable credit${turnover?' (no credit under turnover tax)':share<1?' — taxable share '+pct(share*100):''}</td><td class="num">(${fmt(credit)})</td></tr>
+    <tr class="sub"><td>Less: advance tax at import</td><td class="num">(${fmt(at)})</td></tr>
+    <tr class="sub"><td>Less: VAT deducted at source</td><td class="num">(${fmt(vds)})</td></tr>
+    <tr class="sub"><td>Less: balance brought forward</td><td class="num">(${fmt(bf)})</td></tr>
+    <tr class="total"><td>${net<0?'Excess carried forward':'Net payable'}</td><td class="num">${fmt(Math.abs(net))}</td></tr>
+    ${late>0?`<tr class="sub"><td>Late return penalty</td><td class="num">${fmt(penalty)}</td></tr><tr class="sub"><td>Interest 1% per month × ${Math.ceil(late/30)}</td><td class="num">${fmt(interest)}</td></tr><tr class="total"><td>Total to deposit</td><td class="num">${fmt(total)}</td></tr>`:''}`;
+  state.vat={inputs:{sales,rate,ex,pur,inr,at,vds,bf,late},result:net<0?net:total,summary:`Supplies ${fmt(sales)} @ ${rate}% · ${net<0?'carry forward':'net payable'} ${fmt(Math.abs(net<0?net:total))}`};
+  const incl=num('cv-incl'), cr=num('cv-rate'); const exv=incl/(1+cr/100);
+  $('#cv-out').textContent=`Exclusive ${fmt(exv,2)} + VAT ${fmt(incl-exv,2)} = ${fmt(incl,2)}`;
+}
+
+// ---------- Customs ----------
+function calcCustoms(){
+  const fob=num('cu-fob'), fx=num('cu-fx'), frt=num('cu-frt'); const insEl=$('#cu-ins'); const ins = insEl.value===''?fob*0.01:num('cu-ins');
+  const cif=(fob+frt+ins)*fx; const av=cif*(1+num('cu-land')/100);
+  const cd=av*num('cu-cd')/100, rd=av*num('cu-rd')/100; const sdBase=av+cd+rd; const sd=sdBase*num('cu-sd')/100;
+  const vBase=av+cd+rd+sd; const vat=vBase*num('cu-vat')/100, ait=av*num('cu-ait')/100, at=vBase*num('cu-at')/100;
+  const total=cd+rd+sd+vat+ait+at; const cost=cd+rd+sd;
+  $('#cu-k-total').textContent=tk(total); $('#cu-k-av').textContent=tk(av); $('#cu-k-tti').textContent=av>0?pct(total/av*100):'–'; $('#cu-k-cost').textContent=tk(cost);
+  const row=(l,b,r,a,t)=>`<tr><td>${l}</td><td class="num">${fmt(b)}</td><td class="num">${r}</td><td class="num">${fmt(a)}</td><td>${t}</td></tr>`;
+  $('#cu-table tbody').innerHTML=
+    `<tr class="sub"><td>CIF (FOB ${fmt(fob,2)} + freight ${fmt(frt,2)} + insurance ${fmt(ins,2)}) × ${fmt(fx,2)}</td><td class="num"></td><td class="num"></td><td class="num">${fmt(cif)}</td><td></td></tr>`+
+    row('Assessable value (CIF + landing '+num('cu-land')+'%)','',  '',av,'')+
+    row('Customs duty (CD)',av,num('cu-cd')+'%',cd,'Cost')+
+    row('Regulatory duty (RD)',av,num('cu-rd')+'%',rd,'Cost')+
+    row('Supplementary duty (SD)',sdBase,num('cu-sd')+'%',sd,'Cost')+
+    row('VAT',vBase,num('cu-vat')+'%',vat,'Creditable (Mushak 9.1)')+
+    row('Advance income tax (AIT)',av,num('cu-ait')+'%',ait,'Adjustable vs income tax')+
+    row('Advance tax (AT)',vBase,num('cu-at')+'%',at,'Creditable (Mushak 9.1)')+
+    `<tr class="total"><td colspan="3">Total duty and taxes at import</td><td class="num">${fmt(total)}</td><td></td></tr>
+     <tr class="total"><td colspan="3">Landed cost incl. non-creditable duty</td><td class="num">${fmt(av+cost)}</td><td></td></tr>`;
+  state.customs={inputs:{desc:$('#cu-desc').value,fob,fx,frt,ins:insEl.value,land:num('cu-land'),cd:num('cu-cd'),rd:num('cu-rd'),sd:num('cu-sd'),vat:num('cu-vat'),ait:num('cu-ait'),at:num('cu-at')},result:total,summary:`${$('#cu-desc').value||'Import'} · AV ${fmt(av)} · duties ${fmt(total)} (${pct(av>0?total/av*100:0)})`};
+}
+
+// ---------- Financial statements ----------
+function calcFS(){
+  const rev=num('fs-rev'), cogs=num('fs-cogs'), opex=num('fs-opex'), dep=num('fs-dep'), fin=num('fs-fin'), tax=num('fs-tax');
+  const cash=num('fs-cash'), ar=num('fs-ar'), inv=num('fs-inv'), ca=num('fs-ca'), ta=num('fs-ta'), cl=num('fs-cl'), debt=num('fs-debt'), eq=num('fs-eq'), ap=num('fs-ap');
+  const gp=rev-cogs, op=gp-opex, ebitda=op+dep, pbt=op-fin, np=pbt-tax;
+  const R=[
+    ['Gross margin', rev?gp/rev*100:NaN,'%', v=>v>=25?'good':v>=12?'warn':'crit','Sector-dependent; trading 10-20%, manufacturing 20-35%'],
+    ['Operating margin', rev?op/rev*100:NaN,'%', v=>v>=10?'good':v>=4?'warn':'crit','Above 10% healthy'],
+    ['Net margin', rev?np/rev*100:NaN,'%', v=>v>=6?'good':v>=2?'warn':'crit','After finance cost and tax'],
+    ['Effective tax rate', pbt>0?tax/pbt*100:NaN,'%', v=>v<=30?'good':'warn','Compare with statutory 27.5% / 22.5%'],
+    ['Current ratio', cl?ca/cl:NaN,'x', v=>v>=1.5?'good':v>=1?'warn':'crit','1.5-2.0 comfortable; below 1 signals liquidity stress'],
+    ['Quick ratio', cl?(ca-inv)/cl:NaN,'x', v=>v>=1?'good':v>=.7?'warn':'crit','Above 1.0 preferred'],
+    ['Debt to equity', eq?debt/eq:NaN,'x', v=>v<=1?'good':v<=2?'warn':'crit','Banks in Bangladesh commonly cap at 2:1 for term loans'],
+    ['Interest cover (EBIT / finance cost)', fin?op/fin:NaN,'x', v=>v>=3?'good':v>=1.5?'warn':'crit','Below 1.5 is a covenant warning'],
+    ['Return on equity', eq?np/eq*100:NaN,'%', v=>v>=15?'good':v>=8?'warn':'crit','Compare with 10-12% deposit and bond yields'],
+    ['Return on assets', ta?np/ta*100:NaN,'%', v=>v>=6?'good':v>=3?'warn':'crit',''],
+    ['Asset turnover', ta?rev/ta:NaN,'x', v=>v>=1?'good':v>=.6?'warn':'crit','Revenue per taka of assets'],
+    ['Receivable days', rev?ar/rev*365:NaN,'d', v=>v<=45?'good':v<=75?'warn':'crit','Check against credit terms'],
+    ['Inventory days', cogs?inv/cogs*365:NaN,'d', v=>v<=90?'good':v<=150?'warn':'crit',''],
+    ['Payable days', cogs?ap/cogs*365:NaN,'d', v=>v<=60?'good':v<=90?'warn':'crit','Stretching beyond terms strains suppliers'],
+    ['Cash conversion cycle', (rev&&cogs)?ar/rev*365+inv/cogs*365-ap/cogs*365:NaN,'d', v=>v<=90?'good':v<=150?'warn':'crit','Receivable + inventory − payable days'],
+  ];
+  const tb=$('#fs-table tbody'); tb.innerHTML='';
+  R.forEach(([n,v,u,j,g])=>{ const cls=isFinite(v)?j(v):'mute'; const txt=isFinite(v)?(u==='%'?pct(v):u==='x'?fmt(v,2)+'×':fmt(v,0)+' days'):'–';
+    tb.insertAdjacentHTML('beforeend',`<tr><td>${n}</td><td class="num">${txt}</td><td><span class="pill ${cls}">${cls==='good'?'Sound':cls==='warn'?'Watch':cls==='crit'?'Weak':'n/a'}</span></td><td class="hint">${g}</td></tr>`); });
+  drawBridge([['Revenue',rev],['Gross profit',gp],['EBITDA',ebitda],['Operating profit',op],['Profit before tax',pbt],['Net profit',np]]);
+  state.fs={inputs:{rev,cogs,opex,dep,fin,tax,cash,ar,inv,ca,ta,cl,debt,eq,ap},result:np,summary:`Revenue ${fmt(rev)} · net profit ${fmt(np)} (${rev?pct(np/rev*100):'–'}) · current ratio ${cl?fmt(ca/cl,2):'–'}`};
+}
+function drawBridge(items){
+  const svg=$('#fs-chart'); const W=560,H=240,L=64,Rm=12,T=14,B=44; const pw=W-L-Rm, ph=H-T-B;
+  const vals=items.map(i=>i[1]/100000); const max=Math.max(0,...vals), min=Math.min(0,...vals); const span=(max-min)||1;
+  const y=v=>T+(max-v)/span*ph; const n=items.length, bw=pw/n, barw=Math.min(56,bw*0.6);
+  const ticks=5; let g='<g class="grid">';
+  for(let i=0;i<=ticks;i++){ const v=min+span*i/ticks; const yy=y(v); g+=`<line x1="${L}" x2="${W-Rm}" y1="${yy.toFixed(1)}" y2="${yy.toFixed(1)}"/><text x="${L-6}" y="${(yy+4).toFixed(1)}" text-anchor="end">${fmt(v,0)}</text>`; }
+  g+='</g>';
+  let bars='';
+  items.forEach((it,i)=>{ const v=vals[i]; const x=L+bw*i+(bw-barw)/2; const y0=y(0), y1=y(v); const top=Math.min(y0,y1), h=Math.max(1,Math.abs(y1-y0));
+    bars+=`<rect class="bar${v<0?' neg':''}" x="${x.toFixed(1)}" y="${top.toFixed(1)}" width="${barw}" height="${h.toFixed(1)}" rx="2" data-label="${esc(it[0])}" data-v="${it[1]}"/>`;
+    bars+=`<text x="${(x+barw/2).toFixed(1)}" y="${(v>=0?top-5:top+h+12).toFixed(1)}" text-anchor="middle" style="fill:var(--ink)">${fmt(v,1)}</text>`;
+    const lab=it[0].split(' '); bars+=`<text x="${(x+barw/2).toFixed(1)}" y="${H-B+16}" text-anchor="middle">${esc(lab[0])}</text>`+(lab[1]?`<text x="${(x+barw/2).toFixed(1)}" y="${H-B+29}" text-anchor="middle">${esc(lab.slice(1).join(' '))}</text>`:''); });
+  svg.innerHTML=g+`<line class="axis" x1="${L}" x2="${W-Rm}" y1="${y(0).toFixed(1)}" y2="${y(0).toFixed(1)}"/>`+bars;
+  const tip=$('#fs-tip');
+  svg.querySelectorAll('rect.bar').forEach(r=>{ r.addEventListener('mousemove',e=>{ const wrap=svg.parentElement.getBoundingClientRect(); tip.textContent=r.dataset.label+': '+tk(+r.dataset.v); tip.style.left=(e.clientX-wrap.left+10)+'px'; tip.style.top=(e.clientY-wrap.top-28)+'px'; tip.style.opacity=1; }); r.addEventListener('mouseleave',()=>tip.style.opacity=0); });
+}
+
+// ---------- Calendar ----------
+function taxDay(kind, ye, ref){
+  // returns next return due date on/after ref
+  const y=ref.getFullYear();
+  const cands=[];
+  for(let yy=y-1; yy<=y+1; yy++){
+    if(kind==='individual'){ cands.push(new Date(yy,10,30)); }
+    else { const end=new Date(yy,ye,0); // last day of year-end month
+      let d=new Date(end.getFullYear(),end.getMonth()+7,15); const sept=new Date(end.getFullYear()+1,8,15); if(sept<d) d=sept; cands.push(d); }
+  }
+  return cands.filter(d=>d>=ref).sort((a,b)=>a-b)[0];
+}
+function dueClass(days){ return days<0?'crit':days<=30?'warn':'good'; }
+function renderCalendar(){
+  const today=new Date(); today.setHours(0,0,0,0); $('#cal-today').textContent='Today '+fmtDate(today);
+  const y=today.getFullYear(); const nextMonth=new Date(y,today.getMonth()+1,15);
+  const items=[
+    [nextMonth,'VAT return (Mushak 9.1)','Every month, for the previous tax period'],
+    [new Date(y,today.getMonth()+1,7),'VDS and withholding tax deposit','Within the first week of the following month'],
+    [new Date(y,10,30),'Tax Day — individual returns','Assessment year '+y+'-'+String(y+1).slice(2)],
+    [new Date(y+1,0,15),'Tax Day — companies with 30 June year end','15th of the seventh month after year end'],
+    [new Date(y,8,15),'Advance tax, 1st instalment',''],[new Date(y,11,15),'Advance tax, 2nd instalment',''],
+    [new Date(y+1,2,15),'Advance tax, 3rd instalment',''],[new Date(y+1,5,15),'Advance tax, 4th instalment',''],
+    [new Date(y+1,0,31),'Half-yearly withholding return (Jul–Dec)',''],[new Date(y,6,31),'Half-yearly withholding return (Jan–Jun)',''],
+    [new Date(y,11,31),'AGM deadline for 30 June year end','Within 6 months of year end (Companies Act s.81); annual return to RJSC within 21 days after AGM'],
+    [new Date(y,5,30),'Budget and Finance Act','New rates take effect 1 July'],
+  ].map(([d,t,s])=>[d<today?(t.includes('VAT')||t.includes('VDS')?d:new Date(d.getFullYear()+1,d.getMonth(),d.getDate())):d,t,s])
+   .sort((a,b)=>a[0]-b[0]);
+  $('#cal-list').innerHTML=items.map(([d,t,s])=>{ const days=Math.round((d-today)/864e5); return `<li><span class="d mono">${fmtDate(d)}</span><span class="t"><b>${esc(t)}</b>${s?`<small>${esc(s)}</small>`:''}</span><span class="pill ${dueClass(days)}">${days===0?'today':days<0?Math.abs(days)+'d ago':days+'d'}</span></li>`; }).join('');
+}
+function renderClientDues(){
+  const today=new Date(); today.setHours(0,0,0,0);
+  const rows=clients.map(c=>[taxDay(c.kind==='individual'?'individual':'company', +c.ye||6, today),c]).sort((a,b)=>a[0]-b[0]);
+  $('#cal-clients').innerHTML = rows.length? rows.map(([d,c])=>{ const days=Math.round((d-today)/864e5); return `<li><span class="d mono">${fmtDate(d)}</span><span class="t"><b>${esc(c.name)}</b><small>${c.kind==='individual'?'Individual return':'Company return · year end '+YE[c.ye]}</small></span><span class="pill ${c.status==='filed'?'good':dueClass(days)}">${c.status==='filed'?'filed':days+'d'}</span></li>`; }).join('') : '<li class="empty">No clients yet</li>';
+}
+const YE={6:'30 Jun',12:'31 Dec',3:'31 Mar',9:'30 Sep'};
+
+// ---------- Clients & saved cases (db) ----------
+let db=null, clients=[], cases=[], editingId=null;
+const EXAMPLES=[
+  {id:'ex1',name:'Rahim Traders Ltd (example)',tin:'',bin:'',kind:'company',ye:6,status:'in-progress',phone:'',note:'Example row — saving unavailable in this view',updatedAt:Date.now()},
+  {id:'ex2',name:'Farzana Akter (example)',tin:'',bin:'',kind:'individual',ye:6,status:'pending',phone:'',note:'',updatedAt:Date.now()},
+];
+const state={};
+function setDbState(on,msg){ const s=$('#dbstate'); s.className='status-dot '+(on?'on':'off'); s.querySelector('span').textContent=msg; }
+
+function renderClients(){
+  const q=($('#c-search').value||'').toLowerCase(), f=$('#c-filter').value;
+  const today=new Date(); today.setHours(0,0,0,0);
+  const list=clients.filter(c=>(!q||(c.name||'').toLowerCase().includes(q)||(c.tin||'').includes(q))&&(!f||c.status===f)).sort((a,b)=>(a.name||'').localeCompare(b.name||''));
+  const tb=$('#ctable tbody');
+  tb.innerHTML = list.length? list.map(c=>{ const d=taxDay(c.kind==='individual'?'individual':'company',+c.ye||6,today); const days=Math.round((d-today)/864e5);
+    const st={pending:['mute','Pending'],'in-progress':['acc','In progress'],filed:['good','Filed'],overdue:['crit','Overdue']}[c.status]||['mute',c.status];
+    return `<tr><td><b style="font-weight:500">${esc(c.name)}</b>${c.tin?`<br><span class="hint mono">TIN ${esc(c.tin)}</span>`:''}${c.bin?` <span class="hint mono">BIN ${esc(c.bin)}</span>`:''}</td><td>${{individual:'Individual',company:'Company',firm:'Firm'}[c.kind]||c.kind}</td><td>${YE[c.ye]||''}</td><td class="mono">${fmtDate(d)} <span class="pill ${c.status==='filed'?'mute':dueClass(days)}">${days}d</span></td><td><span class="pill ${st[0]}">${st[1]}</span></td><td style="white-space:nowrap"><button class="btn sm" data-edit="${c.id}" type="button">Edit</button> <button class="btn sm danger" data-del="${c.id}" type="button">Delete</button></td></tr>`; }).join('')
+    : '<tr><td colspan="6" class="empty">No clients match</td></tr>';
+  const counts={pending:0,'in-progress':0,filed:0,overdue:0}; clients.forEach(c=>{ if(counts[c.status]!=null) counts[c.status]++; });
+  const due30=clients.filter(c=>c.status!=='filed'&&Math.round((taxDay(c.kind==='individual'?'individual':'company',+c.ye||6,today)-today)/864e5)<=30).length;
+  $('#clientkpis').innerHTML=`<div class="kpi"><div class="k">Clients</div><div class="v">${clients.length}</div></div><div class="kpi ${due30?'hi':''}"><div class="k">Returns due in 30 days</div><div class="v">${due30}</div></div><div class="kpi"><div class="k">Pending / in progress</div><div class="v">${counts.pending+counts['in-progress']}</div></div><div class="kpi"><div class="k">Filed</div><div class="v">${counts.filed}</div></div><div class="kpi"><div class="k">Overdue</div><div class="v" style="color:${counts.overdue?'var(--crit)':'inherit'}">${counts.overdue}</div></div>`;
+  renderClientDues(); fillClientSelects();
+}
+function renderCases(){
+  const tb=$('#casetable tbody'); const byId=Object.fromEntries(clients.map(c=>[c.id,c.name]));
+  const KIND={income:'Income tax (individual)',company:'Income tax (company)',vat:'VAT',customs:'Customs',fs:'Financial statements'};
+  const list=cases.slice().sort((a,b)=>(b.updatedAt||0)-(a.updatedAt||0));
+  tb.innerHTML = list.length? list.map(k=>`<tr><td class="mono">${fmtDate(new Date(k.updatedAt||0))}</td><td>${esc(byId[k.clientId]||k.clientName||'—')}</td><td>${KIND[k.kind]||k.kind}</td><td>${esc(k.summary)}</td><td class="num">${fmt(k.result)}</td><td style="white-space:nowrap"><button class="btn sm" data-load="${k.id}" type="button">Load</button> <button class="btn sm danger" data-delcase="${k.id}" type="button">Delete</button></td></tr>`).join('')
+    : '<tr><td colspan="6" class="empty">Nothing saved yet. Use “Save to client” on any calculator.</td></tr>';
+}
+function fillClientSelects(){ /* selects are built on demand in saveCase */ }
+
+$('#c-search').addEventListener('input',renderClients); $('#c-filter').addEventListener('change',renderClients);
+$('#cf-reset').addEventListener('click',resetForm);
+function resetForm(){ editingId=null; $('#cform').reset(); $('#cf-title').textContent='New client'; $('#cf-save').textContent='Save client'; $('#cf-msg').textContent=''; }
+$('#cform').addEventListener('submit',async e=>{
+  e.preventDefault();
+  const c={name:$('#c-name').value.trim(),tin:$('#c-tin').value.trim(),bin:$('#c-bin').value.trim(),kind:$('#c-kind').value,ye:+$('#c-ye').value,status:$('#c-status').value,phone:$('#c-phone').value.trim(),note:$('#c-note').value.trim(),updatedAt:Date.now()};
+  if(!c.name) return;
+  if(c.tin && !/^\d{12}$/.test(c.tin)){ $('#cf-msg').textContent='TIN must be 12 digits'; return; }
+  const id=editingId||('c'+Date.now().toString(36)); c.id=id;
+  if(db){ try{ await db.collection('clients').doc(id).set(c); toast(editingId?'Client updated':'Client saved'); }catch(err){ $('#cf-msg').textContent='Could not save: '+(err.message||err.code); return; } }
+  else { const i=clients.findIndex(x=>x.id===id); if(i>=0) clients[i]=c; else clients.push(c); renderClients(); toast('Kept for this view only'); }
+  resetForm();
+});
+document.addEventListener('click',async e=>{
+  const b=e.target.closest('button'); if(!b) return;
+  if(b.dataset.edit){ const c=clients.find(x=>x.id===b.dataset.edit); if(!c) return; editingId=c.id; insv('c-name',c.name); insv('c-tin',c.tin||''); insv('c-bin',c.bin||''); insv('c-kind',c.kind); insv('c-ye',c.ye); insv('c-status',c.status); insv('c-phone',c.phone||''); insv('c-note',c.note||''); $('#cf-title').textContent='Edit client'; $('#cf-save').textContent='Update client'; $('#c-name').focus(); }
+  if(b.dataset.del){ const c=clients.find(x=>x.id===b.dataset.del); if(!c||!confirm('Delete '+c.name+'? Saved computations for this client stay listed.')) return;
+    if(db){ await db.collection('clients').doc(c.id).delete(); } else { clients=clients.filter(x=>x.id!==c.id); renderClients(); } toast('Client deleted'); }
+  if(b.dataset.delcase){ if(!confirm('Delete this saved computation?')) return; if(db){ await db.collection('cases').doc(b.dataset.delcase).delete(); } else { cases=cases.filter(x=>x.id!==b.dataset.delcase); renderCases(); } }
+  if(b.dataset.load){ loadCase(cases.find(x=>x.id===b.dataset.load)); }
+  if(b.dataset.save){ saveCase(b.dataset.save); }
+});
+async function saveCase(kind){
+  const s=state[kind]; if(!s) return;
+  if(!clients.length){ toast('Add a client first'); return; }
+  const names=clients.map((c,i)=>(i+1)+'. '+c.name).join('\n');
+  const pick=prompt('Save to which client?\n'+names+'\n\nEnter the number:','1'); if(pick==null) return;
+  const c=clients[parseInt(pick,10)-1]; if(!c){ toast('No client with that number'); return; }
+  const id='k'+Date.now().toString(36);
+  const doc={id,clientId:c.id,clientName:c.name,kind,inputs:s.inputs,result:Math.round(s.result),summary:s.summary,updatedAt:Date.now()};
+  if(db){ try{ await db.collection('cases').doc(id).set(doc); toast('Saved to '+c.name); }catch(err){ toast('Could not save: '+(err.code||'')); } }
+  else { cases.push(doc); renderCases(); toast('Kept for this view only'); }
+}
+function loadCase(k){
+  if(!k) return; const i=k.inputs||{};
+  const tab=k.kind==='company'?'income':k.kind;
+  if(k.kind==='income'){ if(i.ay&&AY[i.ay]){ aySel.value=i.ay; aySel.dispatchEvent(new Event('change')); } insv('it-income',i.income); insv('it-cat',i.cat); insv('it-loc',i.loc); insv('it-inv',i.inv); insv('it-tds',i.tds); insv('it-adv',i.adv); insv('it-late',i.late||0); calcIncome(); }
+  if(k.kind==='company'){ insv('co-profit',i.profit); insv('co-rate',i.rate); insv('co-receipts',i.receipts); insv('co-minrate',i.minrate); insv('co-paid',i.paid); calcCompany(); }
+  if(k.kind==='vat'){ insv('v-sales',i.sales); insv('v-rate',i.rate); insv('v-exempt',i.ex); insv('v-purch',i.pur); insv('v-inrate',i.inr); insv('v-at',i.at); insv('v-vds',i.vds); insv('v-bf',i.bf); insv('v-late',i.late); calcVat(); }
+  if(k.kind==='customs'){ ['desc','fob','fx','frt','ins','land','cd','rd','sd','vat','ait','at'].forEach(f=>insv('cu-'+f,i[f]==null?'':i[f])); calcCustoms(); }
+  if(k.kind==='fs'){ ['rev','cogs','opex','dep','fin','tax','cash','ar','inv','ca','ta','cl','debt','eq','ap'].forEach(f=>insv('fs-'+f,i[f])); calcFS(); }
+  const b=$('#tabs button[data-tab="'+tab+'"]'); if(b) b.click(); toast('Loaded: '+(k.clientName||''));
+  window.scrollTo({top:0,behavior:'smooth'});
+}
+
+// CSV export via downloads capability
+function csv(){ const h=['Name','TIN','BIN','Type','Year end','Status','Phone','Notes']; const q=v=>'"'+String(v==null?'':v).replace(/"/g,'""')+'"';
+  return [h.join(',')].concat(clients.map(c=>[c.name,c.tin,c.bin,c.kind,YE[c.ye]||'',c.status,c.phone,c.note].map(q).join(','))).join('\r\n'); }
+
+// ---------- Wire inputs ----------
+$$('#p-income input,#p-income select').forEach(el=>el.addEventListener('input',()=>{ if(el.closest('#it-rates')) return; el.id.startsWith('co-')?calcCompany():calcIncome(); }));
+$$('#p-vat input,#p-vat select').forEach(el=>el.addEventListener('input',calcVat));
+$$('#p-customs input').forEach(el=>el.addEventListener('input',calcCustoms));
+$$('#p-fs input').forEach(el=>el.addEventListener('input',calcFS));
+
+renderRates(); calcIncome(); calcCompany(); calcVat(); calcCustoms(); calcFS(); renderCalendar();
+clients=EXAMPLES.slice(); renderClients(); renderCases();
+
+// ---------- Capabilities ----------
+(async()=>{
+  if(!window.claude||!window.claude.use){ setDbState(false,'Not connected'); $('#dbnotice').hidden=false; return; }
+  db = await window.claude.use('db');
+  if(!db){ setDbState(false,'Saving unavailable'); $('#dbnotice').hidden=false; return; }
+  setDbState(true,'Saving on');
+  clients=[]; renderClients();
+  db.collection('clients').onSnapshot(snap=>{ clients=snap.docs.map(d=>Object.assign({id:d.id},d.data())); renderClients(); renderCases(); },
+    err=>{ setDbState(false,'Sync error: '+err.code); });
+  db.collection('cases').orderBy('updatedAt','desc').limit(300).onSnapshot(snap=>{ cases=snap.docs.map(d=>Object.assign({id:d.id},d.data())); renderCases(); },
+    err=>{ setDbState(false,'Sync error: '+err.code); });
+  const dl = await window.claude.use('downloads');
+  if(dl){ const b=$('#c-export'); b.hidden=false; b.addEventListener('click',async()=>{ try{ await dl.save({filename:'clients.csv',data:csv()}); }catch(e){ if(e&&e.code!=='cancelled') toast('Export declined'); } }); }
+})();
+})();
+</script>
