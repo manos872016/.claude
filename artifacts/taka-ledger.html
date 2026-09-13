@@ -427,6 +427,17 @@ const AY = {
 };
 const cloneRates = r => JSON.parse(JSON.stringify(r,(k,v)=>v===Infinity?'INF':v),(k,v)=>v==='INF'?Infinity:v);
 const nn = v => { v=+v; return isFinite(v)&&v>0?v:0; }; // non-negative number or 0
+// Coerce a stored rate table (untrusted: it comes from the shared db) into plain non-negative numbers.
+function sanitizeRates(r){
+  const base=cloneRates(AY[aySel.value]||AY['2026-27']); if(!r||typeof r!=='object') return base;
+  const o={thr:{},slabs:[],min:{},rebate:{}};
+  for(const k of Object.keys(base.thr)) o.thr[k]=nn(r.thr&&r.thr[k]);
+  const sl=Array.isArray(r.slabs)&&r.slabs.length?r.slabs:base.slabs;
+  o.slabs=sl.map((x,i)=>[i===sl.length-1?Infinity:nn(x&&x[0]), nn(x&&x[1])]);
+  for(const k of Object.keys(base.min)) o.min[k]=nn(r.min&&r.min[k]);
+  for(const k of Object.keys(base.rebate)) o.rebate[k]=r.rebate&&r.rebate[k]!=null?nn(r.rebate[k]):base.rebate[k];
+  return o;
+}
 let cur = cloneRates(AY['2026-27']);
 const aySel=$('#ay'); Object.keys(AY).forEach(k=>{const o=document.createElement('option');o.value=k;o.textContent=AY[k].label;aySel.appendChild(o);});
 aySel.addEventListener('change',()=>{ cur = cloneRates(AY[aySel.value]); renderRates(); calcIncome(); });
@@ -436,18 +447,18 @@ function renderRates(){
   const add=(l,a,b)=>{ r.insertAdjacentHTML('beforeend',`<span>${l}</span>${a}${b}`); };
   r.insertAdjacentHTML('beforeend','<span class="eyebrow">Threshold</span><span class="eyebrow">Tk</span><span></span>');
   [['General','general'],['Women / 65+','women'],['Disability / third gender','disabled'],['Freedom fighter','ff']].forEach(([l,k])=>
-    add(l,`<input type="number" data-thr="${k}" value="${cur.thr[k]}" step="5000">`,'<span></span>'));
+    add(l,`<input type="number" data-thr="${k}" value="${nn(cur.thr[k])}" step="5000">`,'<span></span>'));
   r.insertAdjacentHTML('beforeend','<span class="eyebrow">Slab</span><span class="eyebrow">Width Tk</span><span class="eyebrow">Rate %</span>');
   cur.slabs.forEach((s,i)=> add(i===cur.slabs.length-1?'Remainder':'Next',
-    i===cur.slabs.length-1?'<span class="hint">balance</span>':`<input type="number" data-sw="${i}" value="${s[0]}" step="50000">`,
-    `<input type="number" data-sr="${i}" value="${s[1]}" step="0.5">`));
+    i===cur.slabs.length-1?'<span class="hint">balance</span>':`<input type="number" data-sw="${i}" value="${nn(s[0])}" step="50000">`,
+    `<input type="number" data-sr="${i}" value="${nn(s[1])}" step="0.5">`));
   r.insertAdjacentHTML('beforeend','<span class="eyebrow">Minimum tax</span><span class="eyebrow">Tk</span><span></span>');
   [['Dhaka / Ctg','dhakaCtg'],['Other city corp.','otherCity'],['Elsewhere','other']].forEach(([l,k])=>
-    add(l,`<input type="number" data-min="${k}" value="${cur.min[k]}" step="500">`,'<span></span>'));
+    add(l,`<input type="number" data-min="${k}" value="${nn(cur.min[k])}" step="500">`,'<span></span>'));
   r.insertAdjacentHTML('beforeend','<span class="eyebrow">Investment rebate</span><span class="eyebrow">Value</span><span></span>');
-  add('% of total income',`<input type="number" data-rb="incomePct" value="${cur.rebate.incomePct}" step="0.5">`,'<span></span>');
-  add('% of eligible investment',`<input type="number" data-rb="invPct" value="${cur.rebate.invPct}" step="0.5">`,'<span></span>');
-  add('Cap (Tk)',`<input type="number" data-rb="cap" value="${cur.rebate.cap}" step="50000">`,'<span></span>');
+  add('% of total income',`<input type="number" data-rb="incomePct" value="${nn(cur.rebate.incomePct)}" step="0.5">`,'<span></span>');
+  add('% of eligible investment',`<input type="number" data-rb="invPct" value="${nn(cur.rebate.invPct)}" step="0.5">`,'<span></span>');
+  add('Cap (Tk)',`<input type="number" data-rb="cap" value="${nn(cur.rebate.cap)}" step="50000">`,'<span></span>');
   r.querySelectorAll('input').forEach(i=>{ i.min='0'; i.addEventListener('input',()=>{
     if(i.dataset.thr) cur.thr[i.dataset.thr]=nn(i.value);
     if(i.dataset.sw) cur.slabs[+i.dataset.sw][0]=nn(i.value);
@@ -723,8 +734,7 @@ function loadCase(k){
   if(k.kind==='income'){
     if(i.ay&&AY[i.ay]) aySel.value=i.ay;
     // Restore the exact thresholds, slabs, minimums and rebate rule the case was computed with (they may have been edited).
-    if(i.rates&&i.rates.thr&&Array.isArray(i.rates.slabs)&&i.rates.min){ cur=cloneRates(i.rates); if(!cur.rebate) cur.rebate=cloneRates(AY[aySel.value]).rebate; }
-    else cur=cloneRates(AY[aySel.value]);
+    cur = i.rates ? sanitizeRates(i.rates) : cloneRates(AY[aySel.value]);
     renderRates();
     insv('it-income',i.income); insv('it-cat',i.cat); insv('it-loc',i.loc); insv('it-inv',i.inv); insv('it-tds',i.tds); insv('it-adv',i.adv); insv('it-late',+i.late||0); insv('it-dirate',i.dirate==null?4:i.dirate); calcIncome(); }
   if(k.kind==='company'){ if(i.type&&$('#co-type option[value="'+i.type+'"]')) insv('co-type',i.type); else insv('co-type','custom'); insv('co-profit',i.profit); insv('co-rate',i.rate); insv('co-receipts',i.receipts); insv('co-minrate',i.minrate); insv('co-paid',i.paid); calcCompany(); }
