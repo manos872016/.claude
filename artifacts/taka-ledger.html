@@ -142,17 +142,17 @@ summary{cursor:pointer;color:var(--ink-2);font-weight:500;font-size:12px}
   </div>
 </header>
 
-<nav class="tabs" role="tablist" id="tabs">
-  <button role="tab" data-tab="clients" aria-selected="true">Clients</button>
-  <button role="tab" data-tab="income">Income tax</button>
-  <button role="tab" data-tab="vat">VAT</button>
-  <button role="tab" data-tab="customs">Customs</button>
-  <button role="tab" data-tab="fs">Financial statements</button>
-  <button role="tab" data-tab="cal">Calendar</button>
+<nav class="tabs" role="tablist" id="tabs" aria-label="Workspace sections">
+  <button role="tab" id="tab-clients" data-tab="clients" aria-selected="true" aria-controls="p-clients">Clients</button>
+  <button role="tab" id="tab-income" data-tab="income" aria-selected="false" aria-controls="p-income" tabindex="-1">Income tax</button>
+  <button role="tab" id="tab-vat" data-tab="vat" aria-selected="false" aria-controls="p-vat" tabindex="-1">VAT</button>
+  <button role="tab" id="tab-customs" data-tab="customs" aria-selected="false" aria-controls="p-customs" tabindex="-1">Customs</button>
+  <button role="tab" id="tab-fs" data-tab="fs" aria-selected="false" aria-controls="p-fs" tabindex="-1">Financial statements</button>
+  <button role="tab" id="tab-cal" data-tab="cal" aria-selected="false" aria-controls="p-cal" tabindex="-1">Calendar</button>
 </nav>
 
 <!-- ============ CLIENTS ============ -->
-<section class="panel" id="p-clients">
+<section class="panel" role="tabpanel" aria-labelledby="tab-clients" id="p-clients">
   <div class="notice" id="dbnotice" hidden>Saving is unavailable in this view. Entries shown are examples and edits will not be kept.</div>
   <div class="kpis" id="clientkpis"></div>
   <div class="grid g2">
@@ -188,7 +188,7 @@ summary{cursor:pointer;color:var(--ink-2);font-weight:500;font-size:12px}
 </section>
 
 <!-- ============ INCOME TAX ============ -->
-<section class="panel" id="p-income" hidden>
+<section class="panel" role="tabpanel" aria-labelledby="tab-income" id="p-income" hidden>
   <div class="grid g2">
     <div class="card">
       <div class="hd"><h2>Individual assessee</h2><span class="hint" id="it-ayhint"></span></div>
@@ -201,12 +201,12 @@ summary{cursor:pointer;color:var(--ink-2);font-weight:500;font-size:12px}
         <label class="f"><span class="l">Eligible investment (Tk)</span><input type="number" id="it-inv" value="300000" min="0" step="1000"></label>
         <label class="f"><span class="l">Tax deducted at source (Tk)</span><input type="number" id="it-tds" value="60000" min="0" step="1000"></label>
         <label class="f"><span class="l">Advance tax paid (Tk)</span><input type="number" id="it-adv" value="0" min="0" step="1000"></label>
-        <label class="f"><span class="l">Return filed by Tax Day?</span>
-          <select id="it-late"><option value="0">Yes, on time</option><option value="1">No, late</option></select></label>
+        <label class="f"><span class="l">Months filed after Tax Day (0 = on time)</span><input type="number" id="it-late" value="0" min="0" max="60" step="1"></label>
+        <label class="f"><span class="l">Delay interest per month (%)</span><input type="number" id="it-dirate" value="4" min="0" step="0.5"></label>
       </div>
       <details><summary>Slabs and thresholds for this year (editable)</summary>
         <div class="rates" id="it-rates" style="margin-top:8px"></div>
-        <p class="hint" style="margin:8px 0 0">Rebate = lowest of 3% of total income, 15% of eligible investment, or Tk 10,00,000. Late filing: the reduced-rate rebate is lost and 2% per month of delay accrues on the balance. Verify against the Finance Act in force before filing.</p>
+        <p class="hint" style="margin:8px 0 0">Rebate = lowest of the income %, the investment %, and the cap shown above (s.78). A return filed after Tax Day forfeits the rebate (s.173) and attracts delay interest under s.174 on the balance for each month of delay; the rate is editable because it has changed between Finance Acts. Verify against the Finance Act in force before filing.</p>
       </details>
       <div class="row" style="margin-top:12px"><button class="btn primary" type="button" data-save="income">Save to client</button></div>
     </div>
@@ -226,14 +226,15 @@ summary{cursor:pointer;color:var(--ink-2);font-weight:500;font-size:12px}
         <label class="f full"><span class="l">Taxable profit (Tk)</span><input type="number" id="co-profit" value="8500000" min="0" step="10000"></label>
         <label class="f full"><span class="l">Entity type</span>
           <select id="co-type">
-            <option value="27.5">Non-listed company — 27.5%</option>
-            <option value="22.5">Listed company (>10% via IPO) — 22.5%</option>
-            <option value="22.5">One person company — 22.5%</option>
-            <option value="37.5">Bank / insurance / NBFI, listed — 37.5%</option>
-            <option value="40">Bank / insurance / NBFI, non-listed — 40%</option>
-            <option value="45">Mobile operator / tobacco — 45%</option>
-            <option value="15">Textile / RMG (reduced) — 15%</option>
-            <option value="20">Co-operative society — 20%</option>
+            <option value="nonlisted">Non-listed company — 27.5%</option>
+            <option value="listed">Listed company (>10% via IPO) — 22.5%</option>
+            <option value="opc">One person company — 22.5%</option>
+            <option value="bank-listed">Bank / insurance / NBFI, listed — 37.5%</option>
+            <option value="bank-nonlisted">Bank / insurance / NBFI, non-listed — 40%</option>
+            <option value="mobile-tobacco">Mobile operator / tobacco — 45%</option>
+            <option value="textile">Textile / RMG (reduced) — 15%</option>
+            <option value="coop">Co-operative society — 20%</option>
+            <option value="custom">Custom rate</option>
           </select></label>
         <label class="f"><span class="l">Rate applied (%)</span><input type="number" id="co-rate" value="27.5" step="0.5" min="0"></label>
         <label class="f"><span class="l">Gross receipts (Tk)</span><input type="number" id="co-receipts" value="120000000" min="0" step="100000"></label>
@@ -255,7 +256,7 @@ summary{cursor:pointer;color:var(--ink-2);font-weight:500;font-size:12px}
 </section>
 
 <!-- ============ VAT ============ -->
-<section class="panel" id="p-vat" hidden>
+<section class="panel" role="tabpanel" aria-labelledby="tab-vat" id="p-vat" hidden>
   <div class="grid g2">
     <div class="card">
       <div class="hd"><h2>Monthly VAT return (Mushak 9.1)</h2><span class="hint">Due 15th of the following month</span></div>
@@ -263,7 +264,8 @@ summary{cursor:pointer;color:var(--ink-2);font-weight:500;font-size:12px}
         <label class="f"><span class="l">Taxable supplies, excl. VAT (Tk)</span><input type="number" id="v-sales" value="4200000" min="0" step="1000"></label>
         <label class="f"><span class="l">Output rate (%)</span>
           <select id="v-rate"><option value="15">15 standard</option><option value="10">10 reduced</option><option value="7.5">7.5 reduced</option><option value="5">5 reduced</option><option value="4">4 turnover tax</option><option value="0">0 zero-rated / export</option></select></label>
-        <label class="f"><span class="l">Exempt / zero-rated supplies (Tk)</span><input type="number" id="v-exempt" value="300000" min="0" step="1000"></label>
+        <label class="f"><span class="l">Exempt supplies (Tk)</span><input type="number" id="v-exempt" value="300000" min="0" step="1000"></label>
+        <label class="f"><span class="l">Zero-rated / export supplies (Tk)</span><input type="number" id="v-zero" value="0" min="0" step="1000"></label>
         <label class="f"><span class="l">Purchases with valid Mushak 6.3, excl. VAT (Tk)</span><input type="number" id="v-purch" value="2600000" min="0" step="1000"></label>
         <label class="f"><span class="l">Input VAT rate (%)</span><input type="number" id="v-inrate" value="15" step="0.5" min="0"></label>
         <label class="f"><span class="l">Advance tax paid at import (Tk)</span><input type="number" id="v-at" value="45000" min="0" step="1000"></label>
@@ -271,12 +273,12 @@ summary{cursor:pointer;color:var(--ink-2);font-weight:500;font-size:12px}
         <label class="f"><span class="l">Closing balance brought forward (Tk)</span><input type="number" id="v-bf" value="0" min="0" step="1000"></label>
         <label class="f"><span class="l">Days late (if any)</span><input type="number" id="v-late" value="0" min="0" step="1"></label>
       </div>
-      <p class="hint" style="margin:8px 0 0">Input credit is restricted to the taxable share when exempt supplies exist (partial credit). Late return: Tk 10,000 penalty plus 1% interest per month on unpaid VAT.</p>
+      <p class="hint" style="margin:8px 0 0">Input credit is apportioned to the taxable share when exempt supplies exist (partial credit). Zero-rated supplies keep full credit. Late return: Tk 10,000 penalty plus 1% interest per month on unpaid VAT; a credit balance carries forward and does not offset the penalty.</p>
       <div class="row" style="margin-top:12px"><button class="btn primary" type="button" data-save="vat">Save to client</button></div>
     </div>
     <div class="card">
       <div class="kpis">
-        <div class="kpi hi"><div class="k">Net VAT payable</div><div class="v" id="v-k-net">–</div></div>
+        <div class="kpi hi"><div class="k">Total to deposit</div><div class="v" id="v-k-net">–</div></div>
         <div class="kpi"><div class="k">Output VAT</div><div class="v" id="v-k-out">–</div></div>
         <div class="kpi"><div class="k">Allowable input credit</div><div class="v" id="v-k-in">–</div></div>
       </div>
@@ -293,7 +295,7 @@ summary{cursor:pointer;color:var(--ink-2);font-weight:500;font-size:12px}
 </section>
 
 <!-- ============ CUSTOMS ============ -->
-<section class="panel" id="p-customs" hidden>
+<section class="panel" role="tabpanel" aria-labelledby="tab-customs" id="p-customs" hidden>
   <div class="grid g2">
     <div class="card">
       <div class="hd"><h2>Import duty assessment</h2><span class="hint">Bill of Entry basis</span></div>
@@ -327,7 +329,7 @@ summary{cursor:pointer;color:var(--ink-2);font-weight:500;font-size:12px}
 </section>
 
 <!-- ============ FINANCIAL STATEMENTS ============ -->
-<section class="panel" id="p-fs" hidden>
+<section class="panel" role="tabpanel" aria-labelledby="tab-fs" id="p-fs" hidden>
   <div class="grid g2">
     <div class="card">
       <div class="hd"><h2>Statement inputs</h2><span class="hint">Tk, for the income year</span></div>
@@ -363,7 +365,7 @@ summary{cursor:pointer;color:var(--ink-2);font-weight:500;font-size:12px}
 </section>
 
 <!-- ============ CALENDAR ============ -->
-<section class="panel" id="p-cal" hidden>
+<section class="panel" role="tabpanel" aria-labelledby="tab-cal" id="p-cal" hidden>
   <div class="grid g2">
     <div class="card">
       <div class="hd"><h2>Statutory deadlines</h2><span class="hint" id="cal-today"></span></div>
@@ -373,7 +375,7 @@ summary{cursor:pointer;color:var(--ink-2);font-weight:500;font-size:12px}
       <div class="hd"><h2>Client return due dates</h2><span class="hint">Derived from each client's type and year end</span></div>
       <ul class="cal" id="cal-clients"></ul>
       <details><summary>How due dates are derived</summary>
-        <p class="hint" style="margin-top:6px">Individuals: Tax Day, 30 November following the income year. Companies: Tax Day is the 15th day of the seventh month after the income year end (30 June year end → 15 January), or 15 September if that falls earlier. VAT returns: 15th of the next month. Withholding returns: 31 January and 31 July. Advance tax: 15 September, 15 December, 15 March, 15 June.</p>
+        <p class="hint" style="margin-top:6px">Individuals: Tax Day, 30 November following the income year. Companies: Tax Day is the 15th day of the seventh month after the income year end, or 15 September following the year end if the seventh-month date falls earlier (30 June year end → 15 January; 31 December year end → 15 September). VAT returns: 15th of the next month. Withholding returns: 31 January and 31 July. Advance tax: 15 September, 15 December, 15 March, 15 June.</p>
       </details>
     </div>
   </div>
@@ -402,26 +404,32 @@ const fmtDate = d => d.toLocaleDateString('en-GB',{day:'2-digit',month:'short',y
 
 // ---------- Tabs ----------
 $$('#tabs button').forEach(b=>b.addEventListener('click',()=>{
-  $$('#tabs button').forEach(x=>x.setAttribute('aria-selected',x===b));
+  $$('#tabs button').forEach(x=>{ const on=x===b; x.setAttribute('aria-selected',on); x.tabIndex=on?0:-1; });
   $$('.panel').forEach(p=>p.hidden = p.id!=='p-'+b.dataset.tab);
   try{localStorage.setItem('tl.tab',b.dataset.tab);}catch(e){}
 }));
+$('#tabs').addEventListener('keydown',e=>{ const bs=$$('#tabs button'); const i=bs.indexOf(document.activeElement); if(i<0) return; let j=null; if(e.key==='ArrowRight') j=(i+1)%bs.length; if(e.key==='ArrowLeft') j=(i-1+bs.length)%bs.length; if(j!=null){ e.preventDefault(); bs[j].focus(); bs[j].click(); } });
 try{ const t=localStorage.getItem('tl.tab'); if(t){ const b=$('#tabs button[data-tab="'+t+'"]'); if(b) b.click(); } }catch(e){}
 
 // ---------- Assessment-year presets ----------
+// Rates as enacted by the Finance Act for each assessment year. Editable on the page.
 const AY = {
   '2026-27': { label:'AY 2026-27 (income year 2025-26)',
-    thr:{general:375000, women:425000, disabled:500000, ff:525000},
+    thr:{general:400000, women:450000, disabled:525000, ff:550000},
     slabs:[[300000,10],[400000,15],[500000,20],[2000000,25],[Infinity,30]],
-    min:{dhakaCtg:5000, otherCity:5000, other:5000} },
+    min:{dhakaCtg:5000, otherCity:5000, other:5000},
+    rebate:{incomePct:3, invPct:10, cap:750000} },
   '2025-26': { label:'AY 2025-26 (income year 2024-25)',
     thr:{general:350000, women:400000, disabled:475000, ff:500000},
     slabs:[[100000,5],[400000,10],[500000,15],[500000,20],[2000000,25],[Infinity,30]],
-    min:{dhakaCtg:5000, otherCity:4000, other:3000} }
+    min:{dhakaCtg:5000, otherCity:4000, other:3000},
+    rebate:{incomePct:3, invPct:15, cap:1000000} }
 };
-let cur = JSON.parse(JSON.stringify(AY['2026-27'], (k,v)=>v===Infinity?'INF':v), (k,v)=>v==='INF'?Infinity:v);
+const cloneRates = r => JSON.parse(JSON.stringify(r,(k,v)=>v===Infinity?'INF':v),(k,v)=>v==='INF'?Infinity:v);
+const nn = v => { v=+v; return isFinite(v)&&v>0?v:0; }; // non-negative number or 0
+let cur = cloneRates(AY['2026-27']);
 const aySel=$('#ay'); Object.keys(AY).forEach(k=>{const o=document.createElement('option');o.value=k;o.textContent=AY[k].label;aySel.appendChild(o);});
-aySel.addEventListener('change',()=>{ cur = JSON.parse(JSON.stringify(AY[aySel.value],(k,v)=>v===Infinity?'INF':v),(k,v)=>v==='INF'?Infinity:v); renderRates(); calcIncome(); });
+aySel.addEventListener('change',()=>{ cur = cloneRates(AY[aySel.value]); renderRates(); calcIncome(); });
 
 function renderRates(){
   const r=$('#it-rates'); r.innerHTML='';
@@ -436,46 +444,59 @@ function renderRates(){
   r.insertAdjacentHTML('beforeend','<span class="eyebrow">Minimum tax</span><span class="eyebrow">Tk</span><span></span>');
   [['Dhaka / Ctg','dhakaCtg'],['Other city corp.','otherCity'],['Elsewhere','other']].forEach(([l,k])=>
     add(l,`<input type="number" data-min="${k}" value="${cur.min[k]}" step="500">`,'<span></span>'));
-  r.querySelectorAll('input').forEach(i=>i.addEventListener('input',()=>{
-    if(i.dataset.thr) cur.thr[i.dataset.thr]=+i.value||0;
-    if(i.dataset.sw) cur.slabs[+i.dataset.sw][0]=+i.value||0;
-    if(i.dataset.sr!=null) cur.slabs[+i.dataset.sr][1]=+i.value||0;
-    if(i.dataset.min) cur.min[i.dataset.min]=+i.value||0;
+  r.insertAdjacentHTML('beforeend','<span class="eyebrow">Investment rebate</span><span class="eyebrow">Value</span><span></span>');
+  add('% of total income',`<input type="number" data-rb="incomePct" value="${cur.rebate.incomePct}" step="0.5">`,'<span></span>');
+  add('% of eligible investment',`<input type="number" data-rb="invPct" value="${cur.rebate.invPct}" step="0.5">`,'<span></span>');
+  add('Cap (Tk)',`<input type="number" data-rb="cap" value="${cur.rebate.cap}" step="50000">`,'<span></span>');
+  r.querySelectorAll('input').forEach(i=>{ i.min='0'; i.addEventListener('input',()=>{
+    if(i.dataset.thr) cur.thr[i.dataset.thr]=nn(i.value);
+    if(i.dataset.sw) cur.slabs[+i.dataset.sw][0]=nn(i.value);
+    if(i.dataset.sr!=null) cur.slabs[+i.dataset.sr][1]=nn(i.value);
+    if(i.dataset.min) cur.min[i.dataset.min]=nn(i.value);
+    if(i.dataset.rb) cur.rebate[i.dataset.rb]=nn(i.value);
     calcIncome();
-  }));
+  }); });
 }
 
 // ---------- Income tax: individual ----------
 function calcIncome(){
-  const inc=num('it-income'), cat=$('#it-cat').value, loc=$('#it-loc').value, inv=num('it-inv'), tds=num('it-tds'), adv=num('it-adv'), late=$('#it-late').value==='1';
+  const inc=num('it-income'), cat=$('#it-cat').value, loc=$('#it-loc').value, inv=num('it-inv'), tds=num('it-tds'), adv=num('it-adv');
+  const months=Math.max(0,Math.floor(num('it-late'))), diRate=Math.max(0,num('it-dirate')), late=months>0;
   const thr=cur.thr[cat]; let rem=Math.max(0,inc); const rows=[]; let gross=0;
   const t=Math.min(rem,thr); rows.push(['First '+fmt(thr)+' (tax-free)',t,0,0]); rem-=t;
   cur.slabs.forEach((s,i)=>{ const w=s[0]===Infinity?rem:Math.min(rem,s[0]); if(w<=0&&rem<=0) return; const tax=w*s[1]/100; gross+=tax;
     rows.push([(s[0]===Infinity?'Remainder':'Next '+fmt(s[0])),w,s[1],tax]); rem-=w; });
-  const rebate = inc>thr ? Math.min(inc*0.03, inv*0.15, 1000000, gross) : 0;
+  const rb=cur.rebate; const rebateEligible = inc>thr ? Math.min(inc*rb.incomePct/100, inv*rb.invPct/100, rb.cap, gross) : 0;
+  const rebate = late ? 0 : rebateEligible;
   let net = gross-rebate; const minTax=cur.min[loc]||0; let basis='';
   if(inc>thr && net<minTax){ net=minTax; basis='Minimum tax applied'; }
-  const payable = net - tds - adv;
+  const balance = net - tds - adv;
+  const delayInterest = late && balance>0 ? balance*diRate/100*months : 0;
+  const payable = balance + delayInterest;
   $('#it-k-net').textContent = tk(net);
   $('#it-k-pay').textContent = (payable<0?'Refundable ':'')+tk(Math.abs(payable));
   $('#it-k-eff').textContent = inc>0?pct(net/inc*100,2):'–';
   const tb=$('#it-table tbody'); tb.innerHTML='';
   rows.forEach(r=>tb.insertAdjacentHTML('beforeend',`<tr><td>${r[0]}</td><td class="num">${fmt(r[1])}</td><td class="num">${r[2]}%</td><td class="num">${fmt(r[3])}</td></tr>`));
   tb.insertAdjacentHTML('beforeend',`<tr class="total"><td colspan="3">Gross tax</td><td class="num">${fmt(gross)}</td></tr>
-    <tr class="sub"><td colspan="3">Less: investment rebate (lowest of 3% income · 15% investment · Tk 10 lakh)</td><td class="num">(${fmt(rebate)})</td></tr>
+    <tr class="sub"><td colspan="3">Less: investment rebate (lowest of ${rb.incomePct}% income · ${rb.invPct}% investment · Tk ${fmt(rb.cap)})${late?' — forfeited, return filed after Tax Day':''}</td><td class="num">(${fmt(rebate)})</td></tr>
     ${basis?`<tr class="sub"><td colspan="3">${basis} — ${loc==='dhakaCtg'?'Dhaka/Chattogram':loc==='otherCity'?'other city corporation':'outside city corporations'}</td><td class="num">${fmt(minTax)}</td></tr>`:''}
     <tr class="total"><td colspan="3">Tax after rebate</td><td class="num">${fmt(net)}</td></tr>
     <tr class="sub"><td colspan="3">Less: TDS</td><td class="num">(${fmt(tds)})</td></tr>
     <tr class="sub"><td colspan="3">Less: advance tax</td><td class="num">(${fmt(adv)})</td></tr>
-    <tr class="total"><td colspan="3">${payable<0?'Refund due':'Payable with return'}${late?' <span class="pill warn">late — add 2%/month delay interest</span>':''}</td><td class="num">${fmt(Math.abs(payable))}</td></tr>`);
+    ${late?`<tr class="sub"><td colspan="3">Balance before delay interest</td><td class="num">${fmt(balance)}</td></tr><tr class="sub"><td colspan="3">Delay interest (s.174): ${diRate}% × ${months} month${months===1?'':'s'} on the balance</td><td class="num">${fmt(delayInterest)}</td></tr>`:''}
+    <tr class="total"><td colspan="3">${payable<0?'Refund due':'Payable with return'}${late?' <span class="pill warn">late return</span>':''}</td><td class="num">${fmt(Math.abs(payable))}</td></tr>`);
   $('#it-ayhint').textContent = AY[aySel.value].label;
-  state.income={inputs:{income:inc,cat,loc,inv,tds,adv,late:late?1:0,ay:aySel.value},result:payable,summary:`Income ${fmt(inc)} · tax ${fmt(net)} · ${payable<0?'refund':'payable'} ${fmt(Math.abs(payable))}`};
+  const ratesOut = JSON.parse(JSON.stringify(cur,(k,v)=>v===Infinity?'INF':v));
+  state.income={inputs:{income:inc,cat,loc,inv,tds,adv,late:months,dirate:diRate,ay:aySel.value,rates:ratesOut},result:payable,summary:`Income ${fmt(inc)} · tax ${fmt(net)} · ${payable<0?'refund':'payable'} ${fmt(Math.abs(payable))}${late?' · late '+months+'m':''}`};
 }
 
 // ---------- Income tax: company ----------
-$('#co-type').addEventListener('change',()=>{ insv('co-rate',$('#co-type').value); calcCompany(); });
+const CO_RATES={nonlisted:27.5,listed:22.5,opc:22.5,'bank-listed':37.5,'bank-nonlisted':40,'mobile-tobacco':45,textile:15,coop:20};
+$('#co-type').addEventListener('change',()=>{ const k=$('#co-type').value; if(CO_RATES[k]!=null) insv('co-rate',CO_RATES[k]); calcCompany(); });
+$('#co-rate').addEventListener('input',()=>{ const k=$('#co-type').value; if(CO_RATES[k]!=null && +$('#co-rate').value!==CO_RATES[k]) $('#co-type').value='custom'; });
 function calcCompany(){
-  const p=num('co-profit'), r=num('co-rate'), rec=num('co-receipts'), mr=num('co-minrate'), paid=num('co-paid');
+  const p=num('co-profit'), r=num('co-rate'), rec=num('co-receipts'), mr=num('co-minrate'), paid=num('co-paid'), type=$('#co-type').value;
   const reg=p*r/100, min=rec*mr/100; const tax=Math.max(reg,min); const basis = min>reg?'Minimum tax on gross receipts':'Regular tax on profit';
   const pay=tax-paid;
   $('#co-k-tax').textContent=tk(tax); $('#co-k-pay').textContent=(pay<0?'Refundable ':'')+tk(Math.abs(pay)); $('#co-k-basis').textContent=basis;
@@ -484,31 +505,36 @@ function calcCompany(){
     <tr class="total"><td>Higher of the two</td><td class="num">${fmt(tax)}</td></tr>
     <tr class="sub"><td>Less: TDS and advance tax</td><td class="num">(${fmt(paid)})</td></tr>
     <tr class="total"><td>${pay<0?'Refund / carry-forward':'Balance payable'}</td><td class="num">${fmt(Math.abs(pay))}</td></tr>`;
-  state.company={inputs:{profit:p,rate:r,receipts:rec,minrate:mr,paid},result:pay,summary:`Profit ${fmt(p)} @ ${r}% · ${basis.toLowerCase()} · ${pay<0?'refund':'payable'} ${fmt(Math.abs(pay))}`};
+  state.company={inputs:{type,profit:p,rate:r,receipts:rec,minrate:mr,paid},result:pay,summary:`Profit ${fmt(p)} @ ${r}% · ${basis.toLowerCase()} · ${pay<0?'refund':'payable'} ${fmt(Math.abs(pay))}`};
 }
 
 // ---------- VAT ----------
 function calcVat(){
-  const sales=num('v-sales'), rate=parseFloat($('#v-rate').value), ex=num('v-exempt'), pur=num('v-purch'), inr=num('v-inrate'), at=num('v-at'), vds=num('v-vds'), bf=num('v-bf'), late=num('v-late');
+  const sales=num('v-sales'), rate=parseFloat($('#v-rate').value), ex=num('v-exempt'), zero=num('v-zero'), pur=num('v-purch'), inr=num('v-inrate'), at=num('v-at'), vds=num('v-vds'), bf=num('v-bf'), late=Math.max(0,Math.floor(num('v-late')));
   const out=sales*rate/100; const inputVat=pur*inr/100;
-  const share = (sales+ex)>0 ? sales/(sales+ex) : 1;
+  // Partial credit: only exempt supplies dilute the credit. Zero-rated supplies are taxable at 0% and keep full credit.
+  const creditable = sales+zero; const share = (creditable+ex)>0 ? creditable/(creditable+ex) : 1;
   const turnover = rate===4;
   const credit = turnover?0:inputVat*share;
-  const net = out - credit - at - vds - bf;
-  const penalty = late>0 ? 10000 : 0; const interest = late>0 && net>0 ? net*0.01*Math.ceil(late/30) : 0;
-  const total = net + penalty + interest;
-  $('#v-k-net').textContent = net<0?'Carry forward '+tk(-net):tk(total);
+  const net = out - credit - at - vds - bf;           // positive = VAT payable, negative = credit to carry forward
+  const vatPayable = Math.max(net,0), carry = Math.max(-net,0);
+  const months = Math.ceil(late/30);
+  const penalty = late>0 ? 10000 : 0; const interest = late>0 ? vatPayable*0.01*months : 0;
+  const total = vatPayable + penalty + interest;      // amount to deposit; never reduced by a credit balance
+  $('#v-k-net').textContent = tk(total) + (carry>0?' · c/f '+fmt(carry):'');
   $('#v-k-out').textContent = tk(out); $('#v-k-in').textContent = tk(credit);
   $('#v-table tbody').innerHTML=`<tr><td>Output VAT: ${fmt(sales)} × ${rate}%</td><td class="num">${fmt(out)}</td></tr>
     <tr class="sub"><td>Input VAT on purchases: ${fmt(pur)} × ${inr}%</td><td class="num">${fmt(inputVat)}</td></tr>
-    <tr class="sub"><td>Allowable credit${turnover?' (no credit under turnover tax)':share<1?' — taxable share '+pct(share*100):''}</td><td class="num">(${fmt(credit)})</td></tr>
+    <tr class="sub"><td>Allowable credit${turnover?' (no credit under turnover tax)':share<1?' — taxable share '+pct(share*100)+' (exempt supplies excluded)':''}</td><td class="num">(${fmt(credit)})</td></tr>
     <tr class="sub"><td>Less: advance tax at import</td><td class="num">(${fmt(at)})</td></tr>
     <tr class="sub"><td>Less: VAT deducted at source</td><td class="num">(${fmt(vds)})</td></tr>
     <tr class="sub"><td>Less: balance brought forward</td><td class="num">(${fmt(bf)})</td></tr>
-    <tr class="total"><td>${net<0?'Excess carried forward':'Net payable'}</td><td class="num">${fmt(Math.abs(net))}</td></tr>
-    ${late>0?`<tr class="sub"><td>Late return penalty</td><td class="num">${fmt(penalty)}</td></tr><tr class="sub"><td>Interest 1% per month × ${Math.ceil(late/30)}</td><td class="num">${fmt(interest)}</td></tr><tr class="total"><td>Total to deposit</td><td class="num">${fmt(total)}</td></tr>`:''}`;
-  state.vat={inputs:{sales,rate,ex,pur,inr,at,vds,bf,late},result:net<0?net:total,summary:`Supplies ${fmt(sales)} @ ${rate}% · ${net<0?'carry forward':'net payable'} ${fmt(Math.abs(net<0?net:total))}`};
+    <tr class="total"><td>Net VAT payable</td><td class="num">${fmt(vatPayable)}</td></tr>
+    ${carry>0?`<tr class="sub"><td>Credit balance carried forward to next period</td><td class="num">${fmt(carry)}</td></tr>`:''}
+    ${late>0?`<tr class="sub"><td>Late return penalty (fixed)</td><td class="num">${fmt(penalty)}</td></tr><tr class="sub"><td>Interest 1% per month × ${months} on net VAT payable</td><td class="num">${fmt(interest)}</td></tr>`:''}
+    <tr class="total"><td>Total to deposit${late>0?' <span class="pill warn">late return</span>':''}</td><td class="num">${fmt(total)}</td></tr>`;
   const incl=num('cv-incl'), cr=num('cv-rate'); const exv=incl/(1+cr/100);
+  state.vat={inputs:{sales,rate,ex,zero,pur,inr,at,vds,bf,late,cvIncl:incl,cvRate:cr},result:total,summary:`Supplies ${fmt(sales)} @ ${rate}% · deposit ${fmt(total)}${carry>0?' · c/f '+fmt(carry):''}${late>0?' · late':''}`};
   $('#cv-out').textContent=`Exclusive ${fmt(exv,2)} + VAT ${fmt(incl-exv,2)} = ${fmt(incl,2)}`;
 }
 
@@ -523,7 +549,7 @@ function calcCustoms(){
   const row=(l,b,r,a,t)=>`<tr><td>${l}</td><td class="num">${fmt(b)}</td><td class="num">${r}</td><td class="num">${fmt(a)}</td><td>${t}</td></tr>`;
   $('#cu-table tbody').innerHTML=
     `<tr class="sub"><td>CIF (FOB ${fmt(fob,2)} + freight ${fmt(frt,2)} + insurance ${fmt(ins,2)}) × ${fmt(fx,2)}</td><td class="num"></td><td class="num"></td><td class="num">${fmt(cif)}</td><td></td></tr>`+
-    row('Assessable value (CIF + landing '+num('cu-land')+'%)','',  '',av,'')+
+    row('Assessable value (CIF + landing charge)',cif,num('cu-land')+'%',av,'')+
     row('Customs duty (CD)',av,num('cu-cd')+'%',cd,'Cost')+
     row('Regulatory duty (RD)',av,num('cu-rd')+'%',rd,'Cost')+
     row('Supplementary duty (SD)',sdBase,num('cu-sd')+'%',sd,'Cost')+
@@ -582,31 +608,40 @@ function drawBridge(items){
 
 // ---------- Calendar ----------
 function taxDay(kind, ye, ref){
-  // returns next return due date on/after ref
+  // Next return due date on/after ref. ITA 2023 "Tax Day": individuals 30 November after the income year;
+  // companies the 15th of the seventh month after the year end, or 15 September following the year end
+  // where the seventh-month date falls before that 15 September.
   const y=ref.getFullYear();
   const cands=[];
-  for(let yy=y-1; yy<=y+1; yy++){
+  for(let yy=y-2; yy<=y+1; yy++){
     if(kind==='individual'){ cands.push(new Date(yy,10,30)); }
     else { const end=new Date(yy,ye,0); // last day of year-end month
-      let d=new Date(end.getFullYear(),end.getMonth()+7,15); const sept=new Date(end.getFullYear()+1,8,15); if(sept<d) d=sept; cands.push(d); }
+      const seventh=new Date(end.getFullYear(),end.getMonth()+7,15);
+      let sept=new Date(end.getFullYear(),8,15); if(sept<=end) sept=new Date(end.getFullYear()+1,8,15);
+      cands.push(seventh<sept?sept:seventh); }
   }
   return cands.filter(d=>d>=ref).sort((a,b)=>a-b)[0];
 }
 function dueClass(days){ return days<0?'crit':days<=30?'warn':'good'; }
 function renderCalendar(){
   const today=new Date(); today.setHours(0,0,0,0); $('#cal-today').textContent='Today '+fmtDate(today);
-  const y=today.getFullYear(); const nextMonth=new Date(y,today.getMonth()+1,15);
+  const y=today.getFullYear(), m=today.getMonth();
+  // Each entry lists its recurrence; the next occurrence on/after today is shown, so a deadline later this month or year is never skipped.
+  const monthly = day => [-1,0,1,2].map(k=>new Date(y,m+k,day));
+  const yearly = (month,day) => [-1,0,1].map(k=>new Date(y+k,month,day));
+  const next = ds => ds.filter(d=>d>=today).sort((a,b)=>a-b)[0];
   const items=[
-    [nextMonth,'VAT return (Mushak 9.1)','Every month, for the previous tax period'],
-    [new Date(y,today.getMonth()+1,7),'VDS and withholding tax deposit','Within the first week of the following month'],
-    [new Date(y,10,30),'Tax Day — individual returns','Assessment year '+y+'-'+String(y+1).slice(2)],
-    [new Date(y+1,0,15),'Tax Day — companies with 30 June year end','15th of the seventh month after year end'],
-    [new Date(y,8,15),'Advance tax, 1st instalment',''],[new Date(y,11,15),'Advance tax, 2nd instalment',''],
-    [new Date(y+1,2,15),'Advance tax, 3rd instalment',''],[new Date(y+1,5,15),'Advance tax, 4th instalment',''],
-    [new Date(y+1,0,31),'Half-yearly withholding return (Jul–Dec)',''],[new Date(y,6,31),'Half-yearly withholding return (Jan–Jun)',''],
-    [new Date(y,11,31),'AGM deadline for 30 June year end','Within 6 months of year end (Companies Act s.81); annual return to RJSC within 21 days after AGM'],
-    [new Date(y,5,30),'Budget and Finance Act','New rates take effect 1 July'],
-  ].map(([d,t,s])=>[d<today?(t.includes('VAT')||t.includes('VDS')?d:new Date(d.getFullYear()+1,d.getMonth(),d.getDate())):d,t,s])
+    [monthly(15),'VAT return (Mushak 9.1)','Every month, for the previous tax period'],
+    [monthly(7),'VDS and withholding tax deposit','Within the first week of the following month'],
+    [yearly(10,30),'Tax Day — individual returns',d=>'Assessment year '+d.getFullYear()+'-'+String(d.getFullYear()+1).slice(2)],
+    [yearly(0,15),'Tax Day — companies with 30 June year end','15th of the seventh month after year end'],
+    [yearly(8,15),'Tax Day — companies with 31 December year end, and advance tax 1st instalment','15 September following the year end'],
+    [yearly(11,15),'Advance tax, 2nd instalment',''],
+    [yearly(2,15),'Advance tax, 3rd instalment',''],[yearly(5,15),'Advance tax, 4th instalment',''],
+    [yearly(0,31),'Half-yearly withholding return (Jul–Dec)',''],[yearly(6,31),'Half-yearly withholding return (Jan–Jun)',''],
+    [yearly(11,31),'AGM deadline for 30 June year end','Within 6 months of year end (Companies Act s.81); annual return to RJSC within 21 days after AGM'],
+    [yearly(5,30),'Budget and Finance Act','New rates take effect 1 July'],
+  ].map(([ds,t,s])=>{ const d=next(ds); return [d,t,typeof s==='function'?s(d):s]; })
    .sort((a,b)=>a[0]-b[0]);
   $('#cal-list').innerHTML=items.map(([d,t,s])=>{ const days=Math.round((d-today)/864e5); return `<li><span class="d mono">${fmtDate(d)}</span><span class="t"><b>${esc(t)}</b>${s?`<small>${esc(s)}</small>`:''}</span><span class="pill ${dueClass(days)}">${days===0?'today':days<0?Math.abs(days)+'d ago':days+'d'}</span></li>`; }).join('');
 }
@@ -633,7 +668,7 @@ function renderClients(){
   const tb=$('#ctable tbody');
   tb.innerHTML = list.length? list.map(c=>{ const d=taxDay(c.kind==='individual'?'individual':'company',+c.ye||6,today); const days=Math.round((d-today)/864e5);
     const st={pending:['mute','Pending'],'in-progress':['acc','In progress'],filed:['good','Filed'],overdue:['crit','Overdue']}[c.status]||['mute',c.status];
-    return `<tr><td><b style="font-weight:500">${esc(c.name)}</b>${c.tin?`<br><span class="hint mono">TIN ${esc(c.tin)}</span>`:''}${c.bin?` <span class="hint mono">BIN ${esc(c.bin)}</span>`:''}</td><td>${{individual:'Individual',company:'Company',firm:'Firm'}[c.kind]||c.kind}</td><td>${YE[c.ye]||''}</td><td class="mono">${fmtDate(d)} <span class="pill ${c.status==='filed'?'mute':dueClass(days)}">${days}d</span></td><td><span class="pill ${st[0]}">${st[1]}</span></td><td style="white-space:nowrap"><button class="btn sm" data-edit="${c.id}" type="button">Edit</button> <button class="btn sm danger" data-del="${c.id}" type="button">Delete</button></td></tr>`; }).join('')
+    return `<tr><td><b style="font-weight:500">${esc(c.name)}</b>${c.tin?`<br><span class="hint mono">TIN ${esc(c.tin)}</span>`:''}${c.bin?` <span class="hint mono">BIN ${esc(c.bin)}</span>`:''}</td><td>${esc({individual:'Individual',company:'Company',firm:'Firm'}[c.kind]||c.kind)}</td><td>${YE[c.ye]||''}</td><td class="mono">${fmtDate(d)} <span class="pill ${c.status==='filed'?'mute':dueClass(days)}">${days}d</span></td><td><span class="pill ${st[0]}">${esc(st[1])}</span></td><td style="white-space:nowrap"><button class="btn sm" data-edit="${esc(c.id)}" type="button">Edit</button> <button class="btn sm danger" data-del="${esc(c.id)}" type="button">Delete</button></td></tr>`; }).join('')
     : '<tr><td colspan="6" class="empty">No clients match</td></tr>';
   const counts={pending:0,'in-progress':0,filed:0,overdue:0}; clients.forEach(c=>{ if(counts[c.status]!=null) counts[c.status]++; });
   const due30=clients.filter(c=>c.status!=='filed'&&Math.round((taxDay(c.kind==='individual'?'individual':'company',+c.ye||6,today)-today)/864e5)<=30).length;
@@ -644,7 +679,7 @@ function renderCases(){
   const tb=$('#casetable tbody'); const byId=Object.fromEntries(clients.map(c=>[c.id,c.name]));
   const KIND={income:'Income tax (individual)',company:'Income tax (company)',vat:'VAT',customs:'Customs',fs:'Financial statements'};
   const list=cases.slice().sort((a,b)=>(b.updatedAt||0)-(a.updatedAt||0));
-  tb.innerHTML = list.length? list.map(k=>`<tr><td class="mono">${fmtDate(new Date(k.updatedAt||0))}</td><td>${esc(byId[k.clientId]||k.clientName||'—')}</td><td>${KIND[k.kind]||k.kind}</td><td>${esc(k.summary)}</td><td class="num">${fmt(k.result)}</td><td style="white-space:nowrap"><button class="btn sm" data-load="${k.id}" type="button">Load</button> <button class="btn sm danger" data-delcase="${k.id}" type="button">Delete</button></td></tr>`).join('')
+  tb.innerHTML = list.length? list.map(k=>`<tr><td class="mono">${fmtDate(new Date(+k.updatedAt||0))}</td><td>${esc(byId[k.clientId]||k.clientName||'—')}</td><td>${esc(KIND[k.kind]||k.kind)}</td><td>${esc(k.summary)}</td><td class="num">${fmt(+k.result)}</td><td style="white-space:nowrap"><button class="btn sm" data-load="${esc(k.id)}" type="button">Load</button> <button class="btn sm danger" data-delcase="${esc(k.id)}" type="button">Delete</button></td></tr>`).join('')
     : '<tr><td colspan="6" class="empty">Nothing saved yet. Use “Save to client” on any calculator.</td></tr>';
 }
 function fillClientSelects(){ /* selects are built on demand in saveCase */ }
@@ -685,9 +720,15 @@ async function saveCase(kind){
 function loadCase(k){
   if(!k) return; const i=k.inputs||{};
   const tab=k.kind==='company'?'income':k.kind;
-  if(k.kind==='income'){ if(i.ay&&AY[i.ay]){ aySel.value=i.ay; aySel.dispatchEvent(new Event('change')); } insv('it-income',i.income); insv('it-cat',i.cat); insv('it-loc',i.loc); insv('it-inv',i.inv); insv('it-tds',i.tds); insv('it-adv',i.adv); insv('it-late',i.late||0); calcIncome(); }
-  if(k.kind==='company'){ insv('co-profit',i.profit); insv('co-rate',i.rate); insv('co-receipts',i.receipts); insv('co-minrate',i.minrate); insv('co-paid',i.paid); calcCompany(); }
-  if(k.kind==='vat'){ insv('v-sales',i.sales); insv('v-rate',i.rate); insv('v-exempt',i.ex); insv('v-purch',i.pur); insv('v-inrate',i.inr); insv('v-at',i.at); insv('v-vds',i.vds); insv('v-bf',i.bf); insv('v-late',i.late); calcVat(); }
+  if(k.kind==='income'){
+    if(i.ay&&AY[i.ay]) aySel.value=i.ay;
+    // Restore the exact thresholds, slabs, minimums and rebate rule the case was computed with (they may have been edited).
+    if(i.rates&&i.rates.thr&&Array.isArray(i.rates.slabs)&&i.rates.min){ cur=cloneRates(i.rates); if(!cur.rebate) cur.rebate=cloneRates(AY[aySel.value]).rebate; }
+    else cur=cloneRates(AY[aySel.value]);
+    renderRates();
+    insv('it-income',i.income); insv('it-cat',i.cat); insv('it-loc',i.loc); insv('it-inv',i.inv); insv('it-tds',i.tds); insv('it-adv',i.adv); insv('it-late',+i.late||0); insv('it-dirate',i.dirate==null?4:i.dirate); calcIncome(); }
+  if(k.kind==='company'){ if(i.type&&$('#co-type option[value="'+i.type+'"]')) insv('co-type',i.type); else insv('co-type','custom'); insv('co-profit',i.profit); insv('co-rate',i.rate); insv('co-receipts',i.receipts); insv('co-minrate',i.minrate); insv('co-paid',i.paid); calcCompany(); }
+  if(k.kind==='vat'){ insv('v-sales',i.sales); insv('v-rate',i.rate); insv('v-exempt',i.ex); insv('v-zero',i.zero||0); insv('v-purch',i.pur); insv('v-inrate',i.inr); insv('v-at',i.at); insv('v-vds',i.vds); insv('v-bf',i.bf); insv('v-late',i.late); if(i.cvIncl!=null) insv('cv-incl',i.cvIncl); if(i.cvRate!=null) insv('cv-rate',i.cvRate); calcVat(); }
   if(k.kind==='customs'){ ['desc','fob','fx','frt','ins','land','cd','rd','sd','vat','ait','at'].forEach(f=>insv('cu-'+f,i[f]==null?'':i[f])); calcCustoms(); }
   if(k.kind==='fs'){ ['rev','cogs','opex','dep','fin','tax','cash','ar','inv','ca','ta','cl','debt','eq','ap'].forEach(f=>insv('fs-'+f,i[f])); calcFS(); }
   const b=$('#tabs button[data-tab="'+tab+'"]'); if(b) b.click(); toast('Loaded: '+(k.clientName||''));
@@ -714,9 +755,9 @@ clients=EXAMPLES.slice(); renderClients(); renderCases();
   if(!db){ setDbState(false,'Saving unavailable'); $('#dbnotice').hidden=false; return; }
   setDbState(true,'Saving on');
   clients=[]; renderClients();
-  db.collection('clients').onSnapshot(snap=>{ clients=snap.docs.map(d=>Object.assign({id:d.id},d.data())); renderClients(); renderCases(); },
+  db.collection('clients').onSnapshot(snap=>{ clients=snap.docs.map(d=>Object.assign({},d.data(),{id:d.id})); renderClients(); renderCases(); },
     err=>{ setDbState(false,'Sync error: '+err.code); });
-  db.collection('cases').orderBy('updatedAt','desc').limit(300).onSnapshot(snap=>{ cases=snap.docs.map(d=>Object.assign({id:d.id},d.data())); renderCases(); },
+  db.collection('cases').orderBy('updatedAt','desc').limit(300).onSnapshot(snap=>{ cases=snap.docs.map(d=>Object.assign({},d.data(),{id:d.id})); renderCases(); },
     err=>{ setDbState(false,'Sync error: '+err.code); });
   const dl = await window.claude.use('downloads');
   if(dl){ const b=$('#c-export'); b.hidden=false; b.addEventListener('click',async()=>{ try{ await dl.save({filename:'clients.csv',data:csv()}); }catch(e){ if(e&&e.code!=='cancelled') toast('Export declined'); } }); }
